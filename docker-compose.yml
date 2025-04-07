@@ -24,25 +24,26 @@ services:
       - rag_network
     healthcheck:
       test: ["CMD-SHELL", "cqlsh -e 'describe keyspaces'"]
-      interval: 5s
-      timeout: 10s
+      interval: 10s
+      timeout: 5s
       retries: 10
 
   backend:
     container_name: ragagentbot-backend
     build:
       context: ./ragagent/backend/app
-      dockerfile: ../Dockerfile
+      dockerfile: Dockerfile
     ports:
-      - "9005:9000"
+      - "8000:8000"
     volumes:
       - ./ragagent/backend/app:/app 
     environment:
       - OLLAMA_HOST=http://ollama:11434
       - CASSANDRA_HOSTS=great_jennings
     depends_on:
-      - cassandra
-      - ollama
+      cassandra:
+        condition: service_healthy
+
     networks:
       - rag_network
 

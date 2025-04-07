@@ -1,14 +1,30 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
+from pydantic import BaseModel
+from pathlib import Path
 from rag_agent import RAGAgent
 import os
 
+
+class ChatRequest(BaseModel):
+    query: str
+    
+@app.post("/api/chat")
+async def chat(request: ChatRequest):
+    return await rag_agent.generate_response(request.query)
 app = FastAPI()
 rag_agent = RAGAgent()
 
 # Serve frontend
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Replace the static files mount with:
+#static_dir = Path("static")
+#if static_dir.exists():
+#    app.mount("/static", StaticFiles(directory="static"), name="static")
+#else:
+#    print("Warning: Static directory not found - skipping static files mount")
 
 @app.on_event("startup")
 async def startup():
@@ -26,9 +42,11 @@ async def get_ui():
     with open("templates/index.html") as f:
         return HTMLResponse(content=f.read())
 
-@app.post("/api/chat")
-async def chat(query: str):
-    return await rag_agent.generate_response(query)
+#@app.post("/api/chat")
+#async def chat(query: str):
+#    return await rag_agent.generate_response(query)
+
+
 
 @app.post("/api/upload")
 async def upload(file: UploadFile = File(...)):

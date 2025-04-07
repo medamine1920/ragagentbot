@@ -1,8 +1,8 @@
 import ollama
 from sentence_transformers import SentenceTransformer
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.document_loaders import PyPDFLoader, UnstructuredFileLoader
-from cassandra_connector import CassandraConnector
+from langchain_community.document_loaders import PyPDFLoader, UnstructuredFileLoader
+from services.cassandra_connector import CassandraConnector
 from cassandra.cluster import Cluster
 from cassandra.query import dict_factory
 import numpy as np

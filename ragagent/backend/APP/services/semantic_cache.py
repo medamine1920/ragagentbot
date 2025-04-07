@@ -1,15 +1,16 @@
 import faiss
 import numpy as np
-from cassandra_connector import CassandraConnector
-from deepseek_ai import DeepSeekEmbeddings
+from services.cassandra_connector import CassandraConnector
+from sentence_transformers import SentenceTransformer
 from config import Config
 from datetime import datetime
+import ollama
 import uuid
 
 class SemanticCache:
     def __init__(self):
         self.cassandra = CassandraConnector()
-        self.embeddings = DeepSeekEmbeddings(model=Config.EMBEDDING_MODEL)
+        self.embedder = SentenceTransformer(Config.EMBEDDING_MODEL)  
         self.index = faiss.IndexFlatL2(768)
         self._load_existing_cache()
 
