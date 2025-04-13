@@ -1,61 +1,118 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, HTTPException, Query, Depends, UploadFile, File, Form, Response, status, Request
+from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import HTMLResponse, RedirectResponse,JSONResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
-from pathlib import Path
+from fastapi.templating import Jinja2Templates
+from services.auth_service import AuthService, UserInDB, Token
+from services.cassandra_connector import CassandraConnector
 from rag_agent import RAGAgent
+from services.auth_service import hash_password
+
+import logging
 import os
 
-
-class ChatRequest(BaseModel):
-    query: str
-    
-@app.post("/api/chat")
-async def chat(request: ChatRequest):
-    return await rag_agent.generate_response(request.query)
-app = FastAPI()
+# Setup DB + Auth
+db = CassandraConnector()
+auth_service = AuthService(db)
 rag_agent = RAGAgent()
 
-# Serve frontend
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# App initialization
+app = FastAPI(title="RAG Agent Bot", version="1.1")
+app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
+templates = Jinja2Templates(directory="frontend/templates")
 
-# Replace the static files mount with:
-#static_dir = Path("static")
-#if static_dir.exists():
-#    app.mount("/static", StaticFiles(directory="static"), name="static")
-#else:
-#    print("Warning: Static directory not found - skipping static files mount")
-
-@app.on_event("startup")
-async def startup():
-    # Process any existing documents
-    doc_dir = "documents"
-    if os.path.exists(doc_dir):
-        for filename in os.listdir(doc_dir):
-            path = os.path.join(doc_dir, filename)
-            if os.path.isfile(path):
-                with open(path, "rb") as f:
-                    await rag_agent.process_document(f.read(), filename)
+logger = logging.getLogger("ragagent")
+logging.basicConfig(level=logging.INFO)
 
 @app.get("/", response_class=HTMLResponse)
-async def get_ui():
-    with open("templates/index.html") as f:
-        return HTMLResponse(content=f.read())
+async def home(request: Request, current_user: UserInDB = Depends(auth_service.get_current_user)):
+    return templates.TemplateResponse("interface.html", {"request": request, "user": current_user})
 
-#@app.post("/api/chat")
-#async def chat(query: str):
-#    return await rag_agent.generate_response(query)
+@app.post("/login", response_model=Token)
+async def login_user(
+    response: Response,
+    form_data: OAuth2PasswordRequestForm = Depends()
+):
+    token = await auth_service.login_for_access_token(response, form_data)
+    # 👇 Return the token in the JSON so Postman can grab it
+    return token
+
+@app.post("/register")
+async def register(
+    request: Request,
+    username: str = Form(...),
+    email: str = Form(...),
+    password: str = Form(...),
+    his_job: str = Form(...),
+):
+    print(f"✅ Registering {username}")
+    try:
+        hashed_pw = hash_password(password)
+        #db.insert_user(username, email, his_job, hashed_pw)
+        # Insert user into Cassandra
+        print(f"🔥 About to call insert_user with: {username}, {email}, {his_job}")
+        user_id = db.insert_user(username=username, email=email, his_job=his_job, password=hashed_pw)
+        print(f"✅ Registered user_id: {user_id}")
 
 
+        
+        # Determine if request came from Postman (JSON headers)
+        if request.headers.get("accept") == "application/json":
+            return JSONResponse(status_code=200, content={"message": "User registered successfully."})
+        
+        # Otherwise, render HTML template
+        return templates.TemplateResponse("interface.html", {"request": request})
 
-@app.post("/api/upload")
-async def upload(file: UploadFile = File(...)):
-    if file.size > Config.MAX_DOCUMENT_SIZE_MB * 1024 * 1024:
-        raise HTTPException(400, "File too large")
+    except Exception as e:
+        if request.headers.get("accept") == "application/json":
+            return JSONResponse(status_code=500, content={"error": str(e)})
+        return templates.TemplateResponse("interface.html", {"request": request, "error": str(e)})
+
+@app.get("/logout")
+async def logout(response: Response):
+    await auth_service.logout(response)
+    return RedirectResponse(url="/", status_code=302)
+
+@app.post("/upload")
+async def upload_file(
+    request: Request,
+    file: UploadFile = File(...),
+    current_user: UserInDB = Depends(auth_service.get_current_user)
+):
+    try:
+        content = await file.read()
+        filename = file.filename
+        success = await rag_agent.process_document(content, filename)
+        return {"success": success}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/chat")
+async def chat_post(
+    request: Request,
+    question: str = Form(...),
+    current_user: UserInDB = Depends(auth_service.get_current_user)
+):
+    try:
+        response_data = await rag_agent.generate_response(
+            question,
+            {"name": current_user.username, "role": current_user.his_job}
+        )
+        return {
+            "question": question,
+            "answer": response_data["answer"],
+            "sources": response_data.get("sources", [])
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
     
-    success = await rag_agent.process_document(await file.read(), file.filename)
-    return {"status": "success" if success else "error"}
+    
+@app.get("/debug")
+async def debug_uploaded_chunks():
+    try:
+        retriever = rag_agent.astra_db.as_retriever(search_type="similarity", search_kwargs={"k": 5})
+        results = retriever.get_relevant_documents("test")  # use a dummy query
+        return [{"content": doc.page_content, "metadata": doc.metadata} for doc in results]
+    except Exception as e:
+        return {"error": str(e)}
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)

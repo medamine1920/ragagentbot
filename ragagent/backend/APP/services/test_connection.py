@@ -1,4 +1,4 @@
-from cassandra_connector import CassandraConnector
+from services.cassandra_connector import CassandraConnector
 
 def test_connection():
     print("Attempting to connect to Cassandra...")
