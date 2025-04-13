@@ -1,15 +1,35 @@
-import ollama
-from sentence_transformers import SentenceTransformer
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import PyPDFLoader, UnstructuredFileLoader
-from services.cassandra_connector import CassandraConnector
-from cassandra.cluster import Cluster
-from cassandra.query import dict_factory
-import numpy as np
-import tempfile
 import os
-from typing import List, Dict, Optional
+import uuid
+import tempfile
 import logging
+import json
+from langchain_astradb import AstraDBVectorStore
+
+from typing import List, Dict, Optional
+from pathlib import Path
+from collections import OrderedDict
+import time
+import google.generativeai as genai
+
+from langchain.text_splitter import RecursiveCharacterTextSplitter, TokenTextSplitter
+from langchain_community.document_loaders import PyPDFLoader, UnstructuredFileLoader
+from langchain.retrievers import (
+    ContextualCompressionRetriever,
+    MultiQueryRetriever,
+    ParentDocumentRetriever,
+    EnsembleRetriever
+)
+from langchain.storage import InMemoryStore
+from langchain_community.vectorstores import AstraDB
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_core.prompts import PromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
+from langchain.memory import ConversationBufferMemory
+from services.cassandra_connector import CassandraConnector
+from services.llm_service import GeminiService
+from services.semantic_cache import SemanticCache
+from config import settings
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -18,145 +38,161 @@ logger = logging.getLogger(__name__)
 class RAGAgent:
     def __init__(self):
         self.db = CassandraConnector()
-        # Model configurations (hardcoded)
-        self.llm_model = "llama3"  # Options: llama3, mistral, phi3, etc.
-        self.embedding_model = "all-MiniLM-L6-v2"  # Local embedding model
-        
-        # Initialize components
-        self.embedder = SentenceTransformer(self.embedding_model)
+        self.llm = GeminiService()
+        self.cache = SemanticCache()
+
         self.text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
-            chunk_overlap=200,
+            chunk_size=settings.CHUNK_SIZE,
+            chunk_overlap=settings.CHUNK_OVERLAP,
             length_function=len
         )
-        
-        # Initialize Cassandra connection
-        self.cluster = Cluster(['cassandra'])
-        self.session = self.cluster.connect()
-        self.session.set_keyspace('rag_demo')
-        self.session.row_factory = dict_factory
-        
-        # Verify Ollama model is available
-        self._verify_ollama_model()
 
-    def _verify_ollama_model(self):
-        """Ensure the specified Ollama model is available"""
+        self.hf_embedding = HuggingFaceEmbeddings(
+            model_name="all-MiniLM-L6-v2",
+            model_kwargs={'device': 'cpu'},
+            encode_kwargs={'normalize_embeddings': True}
+        )
+
+        self.astra_db = None
+        self.parent_store = InMemoryStore()
+        self.memory = ConversationBufferMemory(return_messages=True)
+
+        self.setup_vector_stores()
+
+    def setup_vector_stores(self):
         try:
-            ollama.show(self.llm_model)
-            logger.info(f"Ollama model '{self.llm_model}' is ready")
+            self.astra_db = AstraDBVectorStore(
+                embedding=self.hf_embedding,
+                collection_name="rag_collection",
+                api_endpoint=os.getenv("ASTRA_DB_API_ENDPOINT"),
+                token=os.getenv("ASTRA_DB_APPLICATION_TOKEN")
+            )
+            logger.info("✅ AstraDB vector store initialized successfully")
         except Exception as e:
-            logger.warning(f"Model {self.llm_model} not found. Pulling...")
-            ollama.pull(self.llm_model)
+            logger.warning(f"⚠️ AstraDB initialization failed: {e}")
+            self.astra_db = None
+
+    async def setup_ensemble_retrievers(self):
+        if not self.astra_db:
+            raise ValueError("❌ No vector store available")
+
+        parent_retriever = self.configure_parent_child_splitters()
+        retrieval = self.astra_db.as_retriever(
+            search_type="mmr",
+            search_kwargs={'k': 5, 'fetch_k': 50}
+        )
+
+        ensemble_retriever = EnsembleRetriever(
+            retrievers=[parent_retriever, retrieval],
+            weights=[0.4, 0.6]
+        )
+
+        multi_retriever = MultiQueryRetriever.from_llm(
+            retriever=ensemble_retriever,
+            llm=self.llm
+        )
+
+        return ContextualCompressionRetriever(
+            base_compressor=None,
+            base_retriever=multi_retriever
+        )
+
+    def configure_parent_child_splitters(self):
+        parent_splitter = TokenTextSplitter(chunk_size=512, chunk_overlap=0)
+        child_splitter = TokenTextSplitter(chunk_size=128, chunk_overlap=0)
+
+        return ParentDocumentRetriever(
+            vectorstore=self.astra_db,
+            docstore=self.parent_store,
+            child_splitter=child_splitter,
+            parent_splitter=parent_splitter,
+        )
 
     async def process_document(self, file_bytes: bytes, filename: str) -> bool:
-        """Process and store uploaded documents"""
         temp_path = None
         try:
-            # Save to temp file for processing
             with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(filename)[1]) as tmp:
                 tmp.write(file_bytes)
                 temp_path = tmp.name
 
-            # Load document based on file type
-            if filename.lower().endswith('.pdf'):
-                loader = PyPDFLoader(temp_path)
-            else:
-                loader = UnstructuredFileLoader(temp_path)
-            
+            loader = PyPDFLoader(temp_path) if filename.lower().endswith('.pdf') else UnstructuredFileLoader(temp_path)
             documents = loader.load()
-            chunks = self.text_splitter.split_documents(documents)
-            
-            # Store each chunk in Cassandra
-            for chunk in chunks:
-                embedding = self.embedder.encode(chunk.page_content)
-                
-                self.session.execute(
-                    """
-                    INSERT INTO documents 
-                    (doc_id, content, embedding, metadata)
-                    VALUES (%s, %s, %s, %s)
-                    """,
-                    (str(uuid.uuid4()), 
-                    chunk.page_content,
-                    embedding.tolist(),
-                    {"source": filename, "type": "text_chunk"}
-                ))
-            
-            logger.info(f"Processed {len(chunks)} chunks from {filename}")
+
+            small_chunks = self.text_splitter.split_documents(documents)
+            if self.astra_db:
+                print("📦 Chunk count:", len(small_chunks))
+                print("🔍 Example chunk:\n", small_chunks[0].page_content[:500])
+                await self.astra_db.aadd_documents(small_chunks)
+                print("✅ Uploaded chunks to AstraDB")
+
+            logger.info(f"📄 Processed {len(documents)} pages into {len(small_chunks)} chunks")
             return True
-            
         except Exception as e:
-            logger.error(f"Failed to process {filename}: {str(e)}")
+            logger.error(f"❌ Document processing failed: {str(e)}")
             return False
         finally:
             if temp_path and os.path.exists(temp_path):
                 os.unlink(temp_path)
 
-    async def retrieve_context(self, query: str, k: int = 3) -> List[Dict]:
-        """Retrieve relevant context chunks using vector similarity"""
+    async def generate_response(self, query: str, user_context: Optional[Dict] = None) -> Dict[str, any]:
         try:
-            query_embedding = self.embedder.encode(query).tolist()
-            
-            # ANN search in Cassandra
-            rows = self.session.execute(
-                """
-                SELECT content, metadata, similarity_cosine(embedding, %s) AS score
-                FROM documents
-                ORDER BY embedding ANN OF %s
-                LIMIT %s
-                """,
-                (query_embedding, query_embedding, k))
-            
-            return [dict(row) for row in rows]
-            
-        except Exception as e:
-            logger.error(f"Retrieval failed: {str(e)}")
-            return []
+            if not hasattr(self, 'compression_retriever'):
+                self.compression_retriever = await self.setup_ensemble_retrievers()
 
-    async def generate_response(self, query: str) -> Dict[str, any]:
-        """Generate LLM response with RAG"""
-        try:
-            # Retrieve relevant context
-            context_chunks = await self.retrieve_context(query)
-            context = "\n\n".join([chunk['content'] for chunk in context_chunks])
-            
-            # Construct prompt
-            prompt = f"""Answer the question based on the following context:
-            
-            Context:
-            {context}
-            
-            Question: {query}
-            
-            Answer:"""
-            
-            # Get LLM response
-            response = ollama.generate(
-                model=self.llm_model,
-                prompt=prompt,
-                stream=False,
-                options={
-                    "temperature": 0.7,
-                    "num_ctx": 4096
-                }
-            )
-            
+            cached = await self.cache.search(query)
+            if cached:
+                return cached
+
+            context = await self.compression_retriever.ainvoke(query)
+            prompt = self._build_enhanced_prompt(query, context, user_context or {})
+            raw_answer = await self.llm.generate(prompt)
+            final_html = raw_answer
+
+            await self.cache.store(query, final_html)
             return {
-                "answer": response['response'],
-                "sources": [chunk['metadata'] for chunk in context_chunks],
-                "from_cache": False
+                "answer": final_html,
+                "sources": [doc.metadata for doc in context],
+                "confidence": "High"
             }
-            
         except Exception as e:
-            logger.error(f"Generation failed: {str(e)}")
+            logger.error(f"❌ Response generation failed: {str(e)}")
             return {
-                "answer": "Sorry, I encountered an error processing your request.",
+                "answer": "<div class='error'>Sorry, something went wrong.</div>",
                 "sources": [],
-                "from_cache": False
+                "confidence": "Low"
             }
+
+    def _build_enhanced_prompt(self, query: str, context: List, user_context: Dict) -> str:
+        context_str = "\n\n".join(
+            f"SOURCE: {doc.metadata.get('source', 'unknown')}\nCONTENT:\n{doc.page_content}\n"
+            for doc in context
+        )
+
+        user_info = ""
+        if user_context:
+            user_info = f"\nUser Profile:\n- Name: {user_context.get('name', 'Unknown')}" \
+                        f"\n- Role: {user_context.get('role', 'Unknown')}" \
+                        f"\n- Preferences: {user_context.get('preferences', 'None')}"
+
+        return f"""You are an expert assistant. Answer the question using the context below.
+                Format your response in HTML with inline CSS for styling.
+
+{user_info}
+
+CONTEXT:
+{context_str}
+
+QUESTION: {query}
+
+Respond with:
+- Well-structured HTML (divs, sections, etc.)
+- Clean, responsive styling
+- Semantic markup where appropriate
+- No <html> or <head> tags, just <body> content"""
 
     def close(self):
-        """Clean up resources"""
-        self.session.shutdown()
-        self.cluster.shutdown()
-        logger.info("Closed Cassandra connection")
+        self.db.close()
+        self.cache.clear_cache()
+        if self.astra_db:
+            self.astra_db.clear()
+        logger.info("🔌 RAG agent shutdown complete")
