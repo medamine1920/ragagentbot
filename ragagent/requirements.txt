@@ -4,6 +4,8 @@ google-generativeai>=0.3.0
 langchain>=0.1.0
 langchain-community>=0.0.29
 sentence-transformers>=2.2.2
+langchain-google-genai
+
 
 # Vector DBs
 cassio>=0.1.4
@@ -11,6 +13,8 @@ faiss-cpu>=1.7.2
 cassandra-driver>=3.28.0
 astrapy
 langchain-astradb
+tiktoken
+
 
 
 # FastAPI + Backend
@@ -38,4 +42,5 @@ python-multipart
 bcrypt==3.2.2
 passlib[bcrypt]==1.7.4
 
-# Testing
+streamlit
+requests
