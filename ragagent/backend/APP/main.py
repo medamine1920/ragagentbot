@@ -77,15 +77,18 @@ async def logout(response: Response):
 async def upload_file(
     request: Request,
     file: UploadFile = File(...),
+    domain: str = Form(...),
     current_user: UserInDB = Depends(auth_service.get_current_user)
 ):
-    try:
-        content = await file.read()
-        filename = file.filename
-        success = await rag_agent.process_document(content, filename)
-        return {"success": success}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    content = await file.read()
+    filename = file.filename
+    user_context = {
+        "username": current_user.username,
+        "email": current_user.email
+    }
+    success = await rag_agent.process_document(content, filename, domain, user_context)
+    return {"success": success}
+
 
 @app.post("/chat")
 async def chat_post(
@@ -101,10 +104,13 @@ async def chat_post(
         return {
             "question": question,
             "answer": response_data["answer"],
-            "sources": response_data.get("sources", [])
+            "sources": response_data.get("sources", []),
+            "confidence": response_data.get("confidence"),
+            "source_type": response_data.get("source_type")
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
     
     
 @app.get("/debug")

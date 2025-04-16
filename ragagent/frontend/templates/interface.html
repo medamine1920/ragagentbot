@@ -99,6 +99,28 @@
         transform: translateY(0);
       }
     }
+    .source {
+      font-size: 0.85em;
+      color: #aaa;
+      margin-top: 6px;
+      padding-left: 10px;
+    }
+    
+    .badge {
+      background-color: #3f51b5;
+      color: white;
+      font-size: 12px;
+      padding: 3px 6px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-top: 4px;
+    }
+    .confidence {
+      color: #9ccc65;
+      font-size: 13px;
+      margin-left: 10px;
+    }
+    
   </style>
 </head>
 <body>
@@ -120,27 +142,73 @@
     const chatBox = document.getElementById('chat-box');
     const chatInput = document.getElementById('chat-input');
     const sendBtn = document.getElementById('send-btn');
-
-    function appendMessage(sender, text) {
+  
+    function appendMessage(sender, text, meta = {}) {
       const messageDiv = document.createElement('div');
       messageDiv.classList.add('message', sender);
-      messageDiv.innerText = text;
+  
+      if (sender === 'bot' && meta.answer) {
+        const answerHTML = document.createElement('div');
+        answerHTML.innerHTML = meta.answer.content || meta.answer; // support both formats
+        messageDiv.appendChild(answerHTML);
+  
+        // Confidence & Source Tag
+        const metaInfo = document.createElement('div');
+        metaInfo.classList.add('badge');
+        metaInfo.innerText = meta.source_type === 'cache' ? 'Cache Hit 🔁' : 'LLM 🔮';
+  
+        const confidence = document.createElement('span');
+        confidence.classList.add('confidence');
+        confidence.innerText = `Confidence: ${meta.confidence || 'High'}`;
+  
+        messageDiv.appendChild(metaInfo);
+        messageDiv.appendChild(confidence);
+  
+        // Sources
+        if (meta.sources && meta.sources.length > 0) {
+          const sourceList = document.createElement('div');
+          sourceList.classList.add('source');
+          sourceList.innerHTML = "<b>Sources:</b><br>";
+          meta.sources.forEach((src, i) => {
+            const label = src.page_label || (src.page !== undefined ? `Page ${src.page + 1}` : `Source ${i + 1}`);
+            sourceList.innerHTML += `🔗 ${label}<br>`;
+          });
+          messageDiv.appendChild(sourceList);
+        }
+  
+      } else {
+        messageDiv.innerText = text;
+      }
+  
       chatBox.appendChild(messageDiv);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
-
-    function handleUserInput() {
+  
+    async function handleUserInput() {
       const text = chatInput.value.trim();
-      if (text !== '') {
-        appendMessage('user', text);
-        chatInput.value = '';
-        setTimeout(() => {
-          // Replace this with your backend call
-          appendMessage('bot', '🤖 ' + text);
-        }, 600);
+      if (!text) return;
+  
+      appendMessage('user', text);
+      chatInput.value = '';
+  
+      try {
+        const formData = new FormData();
+        formData.append('question', text);
+  
+        const res = await fetch('/chat', {
+          method: 'POST',
+          body: formData
+        });
+  
+        const data = await res.json();
+        appendMessage('bot', '', data);
+  
+      } catch (err) {
+        appendMessage('bot', '❌ Error getting response.');
+        console.error(err);
       }
     }
-
+  
     sendBtn.addEventListener('click', handleUserInput);
     chatInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
@@ -148,6 +216,7 @@
       }
     });
   </script>
+  
 
 </body>
 </html>

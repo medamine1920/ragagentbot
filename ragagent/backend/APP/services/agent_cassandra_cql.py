@@ -4,7 +4,7 @@ from typing import Dict, List, Optional
 from dotenv import load_dotenv
 import google.generativeai as genai
 from services.cassandra_connector import CassandraConnector
-from services.TEXT2CQL_PROMPT import PROMPT_FIX_CQL_V2
+from services.text_to_cql import PROMPT_FIX_CQL_V2
 
 load_dotenv()
 
