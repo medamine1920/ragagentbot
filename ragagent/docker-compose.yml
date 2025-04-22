@@ -1,3 +1,4 @@
+version: "3.9"
 
 services:
   cassandra:
@@ -12,23 +13,31 @@ services:
     volumes:
       - cassandra-data:/var/lib/cassandra
     networks:
-      - cassandra-net
+      - ragnet
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'describe keyspaces' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
 
   ragagentbot:
     build:
-      context: .         # root of ragagent/
+      context: .
       dockerfile: Dockerfile
     container_name: ragagentbot
-    hostname: ragagentbot
     ports:
       - "8000:8000"
     env_file:
       - .env
     depends_on:
-      - cassandra
+      cassandra:
+        condition: service_healthy
     networks:
-      - cassandra-net
+      - ragnet
+    restart: always
+
+
 
   streamlit:
     build:
@@ -42,11 +51,10 @@ services:
     depends_on:
       - ragagentbot
     networks:
-      - cassandra-net
-
+      - ragnet
 
 networks:
-  cassandra-net:
+  ragnet:
     driver: bridge
 
 volumes:

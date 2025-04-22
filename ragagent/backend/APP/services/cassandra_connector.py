@@ -1,5 +1,5 @@
 from collections import defaultdict
-from cassandra.cluster import Cluster
+from cassandra.cluster import Cluster, NoHostAvailable
 import cassio
 import uuid
 from dotenv import load_dotenv
@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Optional, Any, Tuple
 import google.generativeai as genai
 import logging
+import time
 
 load_dotenv()
 
@@ -40,7 +41,7 @@ class CassandraConnector:
     
     def __init__(self):
         self.CASSANDRA_HOST = os.getenv("CASSANDRA_HOST", "cassandra")
-        self.CASSANDRA_PORT = int(os.getenv("CASSANDRA_PORT", "9042"))
+        self.CASSANDRA_PORT = int(os.getenv("CASSANDRA_PORT", "9142"))
         self.KEYSPACE = os.getenv("CASSANDRA_KEYSPACE", "rag_keyspace")
 
         self.cluster = Cluster(contact_points=[self.CASSANDRA_HOST], port=self.CASSANDRA_PORT)
@@ -126,6 +127,31 @@ class CassandraConnector:
 
         for table, cql in tables.items():
             self._execute_cql(cql.format(keyspace=self.KEYSPACE))
+    
+    def insert_chat_message(self, session_id, timestamp, role, message, username):
+        query = """
+        INSERT INTO rag_keyspace.chat_history (session_id, timestamp, role, message, username)
+        VALUES (%s, %s, %s, %s, %s)
+        """
+        self.session.execute(query, (session_id, timestamp, role, message, username))
+
+    def get_chat_history(self, session_id):
+        query = """
+        SELECT role, message FROM rag_keyspace.chat_history
+        WHERE session_id = %s ORDER BY timestamp ASC
+        """
+        rows = self.session.execute(query, (session_id,))
+        
+        return [{"role": row.role, "message": row.message} for row in rows]
+    
+    def save_chat_history(self, username: str, question: str, answer: str):
+        timestamp = datetime.utcnow()
+        query = """
+        INSERT INTO chat_history (username, timestamp, question, answer)
+        VALUES (%s, %s, %s, %s)
+        """
+        self.session.execute(query, (username, timestamp, question, answer))
+
 
     def _execute_cql(self, query: str, params: tuple = None) -> Any:
         """Execute CQL query with error handling"""
@@ -357,3 +383,16 @@ class CassandraConnector:
     def execute_statement(self, query: str) -> Any:
         """Raw CQL execution with error handling"""
         return self._execute_cql(query)
+    
+    
+    def connect_with_retry(contact_points, max_attempts=10, delay=5):
+        for attempt in range(max_attempts):
+            try:
+                cluster = Cluster(contact_points)
+                session = cluster.connect()
+                print("✅ Connected to Cassandra")
+                return session
+            except NoHostAvailable:
+                print(f"❌ Cassandra not ready. Retrying... ({attempt+1}/{max_attempts})")
+                time.sleep(delay)
+        raise Exception("❌ Could not connect to Cassandra after retries")

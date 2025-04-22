@@ -76,9 +76,21 @@ class AuthService:
         response.delete_cookie("auth_token")
 
     async def get_current_user(self, request: Request) -> UserInDB:
-        token = request.cookies.get("auth_token")
+        token = None
+
+        #1. Check Cookie
+        if "auth_token" in request.cookies:
+            token = request.cookies.get("auth_token")
+
+        #2. Or check Authorization Header
+        if not token and "authorization" in request.headers:
+            auth_header = request.headers.get("authorization")
+            if auth_header.startswith("Bearer "):
+                token = auth_header.split(" ")[1]
+
         if not token:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             username: str = payload.get("sub")

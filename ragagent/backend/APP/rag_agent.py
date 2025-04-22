@@ -5,6 +5,7 @@ import logging
 import json
 from langchain_astradb import AstraDBVectorStore
 from langchain.retrievers.document_compressors import LLMChainExtractor
+from langchain_core.documents import Document  # ✅ Import Document from langchain_core.documents
 
 from typing import List, Dict, Optional
 from pathlib import Path
@@ -32,6 +33,11 @@ from services.cassandra_connector import CassandraConnector
 from services.llm_service import GeminiService
 from services.semantic_cache import SemanticCache
 from config import settings
+import traceback
+from transformers import AutoTokenizer, AutoModel
+
+model = AutoModel.from_pretrained("intfloat/e5-large-v2")
+print(model.config.hidden_size)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -44,10 +50,10 @@ class RAGAgent:
         
         # ✅ Initialize embeddings before cache
         self.hf_embedding = HuggingFaceEmbeddings(
-            model_name="all-MiniLM-L6-v2",
+            model_name="intfloat/e5-large-v2",  # outputs 1024 dims
             model_kwargs={'device': 'cpu'},
             encode_kwargs={'normalize_embeddings': True}
-        )
+            )
         self.cache = SemanticCache(self.hf_embedding)
 
         self.text_splitter = RecursiveCharacterTextSplitter(
@@ -57,10 +63,10 @@ class RAGAgent:
         )
 
         self.hf_embedding = HuggingFaceEmbeddings(
-            model_name="all-MiniLM-L6-v2",
+            model_name="intfloat/e5-large-v2",  # outputs 1024 dims
             model_kwargs={'device': 'cpu'},
             encode_kwargs={'normalize_embeddings': True}
-        )
+            )
 
         self.astra_db = None
         self.parent_store = InMemoryStore()
@@ -72,7 +78,7 @@ class RAGAgent:
         try:
             self.astra_db = AstraDBVectorStore(
                 embedding=self.hf_embedding,
-                collection_name="rag_collection",
+                collection_name="rag_collection_v2",
                 api_endpoint=os.getenv("ASTRA_DB_API_ENDPOINT"),
                 token=os.getenv("ASTRA_DB_APPLICATION_TOKEN")
             )
@@ -87,7 +93,7 @@ class RAGAgent:
 
         parent_retriever = self.configure_parent_child_splitters()
         retrieval = self.astra_db.as_retriever(
-            search_type="mmr",
+            search_type="similarity",
             search_kwargs={'k': 5, 'fetch_k': 50}
         )
 
@@ -132,10 +138,16 @@ class RAGAgent:
                 documents = loader.load()
 
                 small_chunks = self.text_splitter.split_documents(documents)
+                
                 if self.astra_db:
                     for chunk in small_chunks:
-                        chunk.metadata["uploaded_by"] = user_context["email"]  # or user_context["username"]
-                    await self.astra_db.aadd_documents(small_chunks)
+                        chunk.metadata["uploaded_by"] = user_context["email"]
+                    # FIX: Convert to dict with `content`
+                    astra_formatted_docs = [
+                        Document(page_content=chunk.page_content, metadata=chunk.metadata)
+                        for chunk in small_chunks
+                    ]
+                    await self.astra_db.aadd_documents(astra_formatted_docs)
 
                 logger.info(f"📄 Processed {len(documents)} pages into {len(small_chunks)} chunks")
                 return True
@@ -148,42 +160,72 @@ class RAGAgent:
 
     async def generate_response(self, query: str, user_context: Optional[Dict] = None) -> Dict[str, any]:
         try:
+            logger.debug("🔍 Starting response generation")
+            logger.debug(f"Query received: {query}")
+
             if not hasattr(self, 'compression_retriever'):
                 self.compression_retriever = await self.setup_ensemble_retrievers()
 
-            # ✅ Check if the response is cached
+        # ✅ Check if the response is cached
             cached = await self.cache.search(query)
             if cached:
+                logger.debug("✅ Cache hit")
                 return {
                     "answer": cached,
                     "sources": [],
-                    "confidence": "High",
+                    "confidence": 1.0,
                     "source_type": "cache"
                 }
 
-            # ✅ Otherwise, generate it with LLM
-            context = await self.compression_retriever.ainvoke(query)
+            logger.debug("❌ Not in cache. Fetching context...")
+            try:
+                context = await self.compression_retriever.ainvoke(query)
+            except Exception as e:
+                logger.error("❌ Retriever failed:", exc_info=True)
+                raise
+            logger.debug(f"Retrieved context: {context}")
+
             if not context:
                 raise ValueError("No relevant documents found for this query.")
 
             prompt = self._build_enhanced_prompt(query, context, user_context or {})
-            raw_answer = await self.llm.generate(prompt)
-            final_html = raw_answer
+            logger.debug(f"Generated prompt: {prompt}")
 
-            await self.cache.store(query, final_html)
+            try:
+                raw_answer_obj = await self.llm.generate(prompt)
+                raw_answer = str(raw_answer_obj) if not isinstance(raw_answer_obj, str) else raw_answer_obj
+
+            except Exception as e:
+                logger.error("❌ LLM generation failed:", exc_info=True)
+                raise
+            logger.debug(f"LLM response: {raw_answer}")
+
+            await self.cache.store(query, raw_answer)
+
+            if user_context and "name" in user_context:
+                try:
+                    self.db.save_chat_history(
+                        username=user_context["name"],
+                        question=query,
+                        answer=raw_answer
+                    )
+                    logger.info(f"✅ Chat saved for {user_context['name']}")
+                except Exception as e:
+                    logger.error(f"⚠️ Failed to save chat history: {e}")
+                    
             return {
-                "answer": final_html,
+                "answer": raw_answer,
                 "sources": [doc.metadata for doc in context],
-                "confidence": "High",
+                "confidence": 1.0,
                 "source_type": "llm"
             }
-
         except Exception as e:
             logger.error(f"❌ Response generation failed: {str(e)}")
+            logger.error(traceback.format_exc())
             return {
-                "answer": "<div class='error'>Sorry, something went wrong.</div>",
+                "answer": f"<div class='error'>Internal Error: {str(e)}</div>",
                 "sources": [],
-                "confidence": "Low",
+                "confidence": 0.0,
                 "source_type": "error"
             }
 
