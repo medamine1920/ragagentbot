@@ -2,21 +2,38 @@
 __pycache__/
 *.py[cod]
 *.so
+*.pyd
 
-# Virtual environment
-venv/
-env/
-Lib/
-Scripts/
-Include/
-pyvenv.cfg
+# Virtual environments
+ragagent/Lib/
+ragagent/Scripts/
+ragagent/Include/
+ragagent/pyvenv.cfg
+ragagent/.env
+ragagent/share/
+ragagent/etc/
 
-# VS Code settings
-.vscode/
-
-# Docker files
+# Jupyter, Streamlit, and temp data
+share/
+etc/
+.ipynb_checkpoints/
 *.log
+*.tmp
 
-# OS-specific
+# Ignore secrets and environment files
+.env
+.env.*
+
+# IDE and Editor settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS-specific files
 .DS_Store
 Thumbs.db
+
+# Project-specific
+documents/
+node_modules/
