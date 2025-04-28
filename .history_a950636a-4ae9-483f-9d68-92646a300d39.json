@@ -1,1 +1,0 @@
-[{"role": "user", "message": "what's the content of the file ?"}, {"role": "assistant", "message": "<div class='error'>Internal Error: No relevant documents found for this query.</div>"}, {"role": "user", "message": "data stream"}, {"role": "assistant", "message": "<div class='error'>Sorry, something went wrong.</div>"}]

@@ -1,1 +1,0 @@
-[{"role": "user", "message": "test"}, {"role": "assistant", "message": "<div class='error'>Internal Error: 'content'</div>"}, {"role": "user", "message": "the content of the uploaded file ?"}, {"role": "assistant", "message": "<div class='error'>Internal Error: 'content'</div>"}]
