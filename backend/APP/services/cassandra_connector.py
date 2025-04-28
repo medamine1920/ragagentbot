@@ -144,13 +144,14 @@ class CassandraConnector:
         
         return [{"role": row.role, "message": row.message} for row in rows]
     
-    def save_chat_history(self, username: str, question: str, answer: str):
+    def save_chat_history(self, username: str, question: str, answer: str, session_id: str):
         timestamp = datetime.utcnow()
         query = """
-        INSERT INTO chat_history (username, timestamp, question, answer)
-        VALUES (%s, %s, %s, %s)
+        INSERT INTO chat_history (session_id, username, timestamp, question, answer)
+        VALUES (%s, %s, %s, %s, %s)
         """
-        self.session.execute(query, (username, timestamp, question, answer))
+        self.session.execute(query, (uuid.UUID(session_id), username, timestamp, question, answer))
+
 
 
     def _execute_cql(self, query: str, params: tuple = None) -> Any:
@@ -396,3 +397,28 @@ class CassandraConnector:
                 print(f"❌ Cassandra not ready. Retrying... ({attempt+1}/{max_attempts})")
                 time.sleep(delay)
         raise Exception("❌ Could not connect to Cassandra after retries")
+    
+    def log_login_attempt(self, username: str, ip_address: str, user_agent: str, successful: bool):
+        session_id = uuid.uuid4()
+        timestamp = datetime.utcnow()
+        query = """
+            INSERT INTO rag_keyspace.login_history (session_id, username, timestamp, ip_address, user_agent, successful)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """
+        self.session.execute(query, (session_id, username, timestamp, ip_address, user_agent, successful))
+        
+        
+    def log_login_attempt(self, username: str, ip_address: str, user_agent: str, successful: bool):
+            
+        session_id = uuid.uuid4()
+        timestamp = datetime.utcnow()
+
+        self.session.execute(
+            """
+            INSERT INTO rag_keyspace.login_history (
+                session_id, username, timestamp, ip_address, user_agent, successful
+            )
+            VALUES (%s, %s, %s, %s, %s, %s)
+            """,
+            (session_id, username, timestamp, ip_address, user_agent, successful)
+        )

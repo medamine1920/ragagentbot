@@ -14,16 +14,19 @@ class SemanticCache:
     def __init__(self, embedding_model):
         self.embedder = embedding_model  # HuggingFace embedding model
         self.db = CassandraConnector()
-        self.index = faiss.IndexFlatL2(384)  # Adjust to your embedding size
+        self.index = faiss.IndexFlatL2(1024)  # Adjust to your embedding size
         self.id_map = {}
         self.memory = {}  # Optional in-memory cache
         self._load_cache()
+
+    def _normalize(self, text: str) -> str:
+        return text.strip().lower().replace("?", "").replace(".", "").replace(",", "")
 
     def _load_cache(self):
         """Load existing cache entries"""
         try:
             rows = self.db.session.execute(
-                "SELECT doc_id, embedding FROM documents WHERE metadata['type'] = 'cache'"
+                "SELECT doc_id, embedding FROM documents WHERE metadata['type'] = 'cache' ALLOW FILTERING",
             )
             embeddings = []
             for idx, row in enumerate(rows):
@@ -39,6 +42,12 @@ class SemanticCache:
 
     async def search(self, query: str) -> Optional[str]:
         """Search for similar cached responses"""
+        query = self._normalize(query)
+
+        if query in self.memory:
+            logger.info("⚡ Hit in in-memory cache!")
+            return self.memory[query]
+
         try:
             embedding = self.embedder.embed_query(query)
             embedding = np.array(embedding, dtype='float32').reshape(1, -1)
@@ -58,10 +67,10 @@ class SemanticCache:
 
     async def store(self, query: str, result: str):  
         """Store new response in cache"""
-        self.memory[query] = result
+        query = self._normalize(query)
 
         try:
-            embedding = self.embedder.embed_query(result)
+            embedding = self.embedder.embed_query(query)
             doc_id = uuid.uuid4()
 
             self.db.session.execute(
@@ -76,6 +85,7 @@ class SemanticCache:
 
             self.index.add(np.array([embedding], dtype='float32'))
             self.id_map[self.index.ntotal - 1] = str(doc_id)
+            self.memory[query] = result
 
             logger.debug(f"✅ Cached response: {result[:50]}...")
         except Exception as e:

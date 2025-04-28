@@ -9,7 +9,9 @@ from rag_agent import RAGAgent
 from services.auth_service import hash_password
 from services.semantic_cache import SemanticCache  # Make sure this is imported
 from utils.text_classification import guess_domain_from_text
-
+from services.cassandra_connector import CassandraConnector
+from datetime import datetime
+import uuid
 import logging
 import os
 
@@ -34,12 +36,36 @@ async def home(request: Request, current_user: UserInDB = Depends(auth_service.g
 
 @app.post("/login", response_model=Token)
 async def login_user(
+    request: Request,  # 👈 To get IP & User-Agent
     response: Response,
     form_data: OAuth2PasswordRequestForm = Depends()
 ):
-    token = await auth_service.login_for_access_token(response, form_data)
-    # 👇 Return the token in the JSON so Postman can grab it
-    return token
+    ip_address = request.client.host
+    user_agent = request.headers.get("user-agent", "unknown")
+
+    try:
+        token = await auth_service.login_for_access_token(response, form_data)
+
+        # ✅ Log successful login
+        db.log_login_attempt(
+            username=form_data.username,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            successful=True
+        )
+
+        return token
+
+    except Exception as e:
+        # ❌ Log failed login
+        db.log_login_attempt(
+            username=form_data.username,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            successful=False
+        )
+
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
 @app.post("/register")
 async def register(
@@ -103,11 +129,17 @@ async def upload_file(
 async def chat_post(
     request: Request,
     question: str = Form(...),
+    session_id: str = Form(None),  # allow optional session_id
     current_user: UserInDB = Depends(auth_service.get_current_user)
 ):
+    rag_agent = RAGAgent()
     try:
         # ✅ Step 1: Try cache first
         cached_answer = await semantic_cache.search(question)
+        if cached_answer:
+            logger.info(f"✅ Semantic Cache HIT for: {question[:50]}...")
+        else:
+            logger.warning(f"❌ Cache MISS — Gemini will be called for: {question[:50]}...")
         if cached_answer:
             return {
                 "question": question,
@@ -120,7 +152,7 @@ async def chat_post(
         # ✅ Step 2: Fallback to LLM if not cached
         response_data = await rag_agent.generate_response(
             question,
-            {"name": current_user.username, "role": current_user.his_job}
+            {"name": current_user.username, "role": current_user.his_job,"session_id": session_id}  # Pass session_id if available
         )
 
         # ✅ Step 3: Store answer in cache
@@ -159,5 +191,42 @@ async def debug_uploaded_chunks():
 async def get_history(session_id: str, current_user: UserInDB = Depends(auth_service.get_current_user)):
     history = db.get_chat_history(session_id)
     return {"history": history}
+
+@app.get("/sessions")
+async def get_sessions(user: str = Query(...)):
+    query = """
+    SELECT session_id, title, timestamp FROM sessions WHERE username = %s ALLOW FILTERING
+    """
+    rows = CassandraConnector.session.execute(query, (user,))
+    
+    sessions = []
+    for row in rows:
+        sessions.append({
+            "session_id": str(row.session_id),
+            "title": row.title,
+            "timestamp": str(row.timestamp)
+        })
+    
+    return {"sessions": sessions}
+
+
+@app.post("/register_session")
+async def register_session(
+    session_id: str = Form(...),
+    title: str = Form(...),
+    username: str = Form(...)
+):
+    timestamp = datetime.utcnow()
+
+    query = """
+    INSERT INTO sessions (session_id, title, username, timestamp)
+    VALUES (%s, %s, %s, %s)
+    """
+
+    CassandraConnector.session.execute(query, (uuid.UUID(session_id), title, username, timestamp))
+
+    return {"message": "Session registered successfully"}
+
+
 
 

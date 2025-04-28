@@ -30,6 +30,10 @@ services:
       - "8000:8000"
     env_file:
       - .env
+    volumes:
+      - ./models:/app/models 
+      - ./backend/APP:/app  # Mount the backend code for live editing
+      - ./frontend:/app/frontend  # Mount the frontend code for live editing
     depends_on:
       cassandra:
         condition: service_healthy
