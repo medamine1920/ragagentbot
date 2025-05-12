@@ -1,0 +1,405 @@
+"username","timestamp","answer","question","session_id"
+avril,"2025-05-05T07:36:48.022Z","Based on the provided document, ""Our Solution : Chat Assistant"" is presented as a solution.",the best solution suggested from this uploaded document ?,e984c384-6dbf-4c81-a7dd-db24c154ff55
+avril,"2025-05-04T22:12:01.329Z",The requested information was not found in the provided document.,hey,"9af7b2e1-4b36-4e5e-a994-40f7301564bc"
+avril,"2025-05-04T16:18:25.400Z","The document does not contain a problem to be solved. It appears to be a user guide for an appliance store. It describes how to access uploaded documents and use a simulator.
+
+The requested information was not found in the provided document.",the solution of this file ?,"612a746d-caf0-4178-b14a-3d8f6ce593f3"
+avril,"2025-05-04T16:17:52.039Z","## Math.txt File Content
+
+The math.txt file contains the following:
+
+- ""5+5 =""
+- ""5+5 =""
+- ""5+5 =""
+- ""5+5 =""
+- ""5+5 =""",math.txt file,"612a746d-caf0-4178-b14a-3d8f6ce593f3"
+avril,"2025-05-04T14:19:31.138Z","Based on the document, the solution is:
+
+## Our Solution
+
+*   ""Our Solution : ChatBot 03""",what's the solution ?,"909a336c-0c7e-4da7-ac6e-7f643de92b98"
+avril,"2025-05-04T13:41:48.394Z","Bonjour. The document contains the following greetings:
+
+*   ""bonjour le 20-avril-2025 16:26""
+*   ""bonjour le 20-avril-2025 16:26""
+*   ""bonjour le 20-avril-2025 16:26""",hi,"8b5fb5b7-24fe-4a7b-a557-c8461cd6c1a6"
+avril,"2025-05-04T12:44:47.691Z","Bonjour. The document contains the following greetings:
+
+- ""bonjour le 20-avril-2025 16:26""
+- ""bonjour le 20-avril-2025 16:26""
+- ""bonjour le 20-avril-2025 16:26""",hello,"89a6bce2-1577-4b82-887a-284ba4424432"
+avril,"2025-05-02T07:45:37.491Z","The document outlines several problems and proposes a chatbot as a solution.
+
+### Problems:
+- ""Slow Response Times""
+- ""Manual Handling""
+- ""Limited Availability""
+- ""Scalability Issues""
+
+### Solution:
+- ""Our Solution : ChatBot""",what's the content and give a solution,"5d62e764-1366-48da-a1f6-7d27aec65703"
+avril,"2025-04-30T21:46:23.789Z",The requested information was not found in the provided document.,what's the content of math.txt file and reply on it ,"692d3441-d077-4939-ae0d-c8bb6f71d223"
+avril,"2025-04-30T16:33:48.087Z",The requested information was not found in the provided document.,the last uploaded file called math.txt,"1e3d6395-1709-4418-a7b7-3b1c40b138bc"
+avril,"2025-04-30T16:15:01.762Z","The content of the uploaded file appears to be a user guide for different stores. Here's a breakdown:
+
+*   **Store électroménager (Household appliance store):**
+    *   ""Pour consulter les documents de Justificatifs de demande au paravant uploadé il faut que le client accède à son profil puis clique sur “Mes documents“ c’est une interface qui contient les informations de chaque document""
+    *   ""On clique sur “le document” vous pouvez uploader les justificatifs manquants ainsi que voir les fichiers uploadés déjà.""
+    *   ""La page de Devis affiche la liste des devis uploadés""
+
+*   **Store véhicule (Vehicle store):**
+    *   ""En cliquant sur upload galerie, le concessionnaire peut uploader des images pour les finitions déjà ajoutées. Ilsuffit de choisir la finition et sélectionner les images avec les formats: png, jpg, jpeg.""
+    *   ""Le nombre d’images uploadées ne doit pas dépasser 80.""",what's the content of this uploaded file ?,"1e3d6395-1709-4418-a7b7-3b1c40b138bc"
+avril,"2025-04-28T13:19:10.962Z","The document provided is a ""Guided'Utilisationstorevéhicule"" manual. It includes information about:
+
+- Stock
+- Gestion de contenu
+- Déconnexion
+- TableaudeBord
+
+## TableaudeBord Interface
+
+In the TableaudeBord interface, the dealer can consult:
+
+- ""Lenombrededemandesdefinancementsencours""
+- ""Lesstatistiquesdétaillées""
+- ""Lenombredesnotificationsnonlus""
+- ""BoxVoiturepermetlaredirectionversl’interfaced’ajoutdestock""
+
+## Mes devis
+
+- ""Cetespacepermetauclientderecevoirlesnouvellesmodificationssurlademandepourl’informerqueledevisestprêt.Ilpeutégalementl’accepteroulerefuser.""",what the content of Manual_Vehicle_Store_QA_Dataset.csv ?,"61f53dbf-85c7-442a-96a4-2694b1f480bd"
+avril,"2025-04-28T13:18:44.497Z",The requested information was not found in the provided document.,the content of the last uploaded file ?,"61f53dbf-85c7-442a-96a4-2694b1f480bd"
+avril,"2025-04-28T12:34:18.592Z","## Guided Utilisation store électroménager
+
+- **Page mes documents:**
+    - To view previously uploaded supporting documents, the customer must access their profile and click on ""Mes documents.""
+    - This interface contains information for each document.
+    - By clicking on ""ledocument,"" you can upload missing supporting documents and view already uploaded files.
+
+## Guided Utilisation store véhicule
+
+- **Page mes documents:**
+    - To view previously uploaded supporting documents, the customer must access their profile and click on ""Mes documents.""
+    - This interface contains information for each document, such as:
+        - La référence
+        - L’offre
+        - La couleur
+        - La date de demande
+        - L’état
+        - L'action
+    - By clicking on ""ledocument,"" you can upload missing supporting documents and view already uploaded files.",show me the data from this file,"7f372353-eb0b-45ee-be3a-a743406f0426"
+avril,"2025-04-28T12:33:28.635Z",The requested information was not found in the provided document.,how many uploaded documents you have ?,"7f372353-eb0b-45ee-be3a-a743406f0426"
+avril,"2025-04-28T11:26:37.335Z","This file provides guidance on using the ""Mes documents"" section within online stores for both appliances and vehicles.
+
+Here's a breakdown:
+
+*   **Accessing Documents:** To view previously uploaded documents for proof of request, customers need to access their profile and click on ""Mes documents."" This interface contains information for each document.
+*   **Document Details (Vehicles):** For vehicle stores, the ""Mes documents"" interface contains information such as:
+    *   La référence
+    *   L’offre
+    *   La couleur
+    *   La date de demande
+    *   L’état
+    *   L'action
+*   **Actions:** By clicking on ""le document,"" users can upload missing documents and view already uploaded files.",what this file is talking about ?,d7c1bff7-80f2-4c29-9f38-71b538b77420
+avril,"2025-04-28T11:20:31.461Z",The requested information was not found in the provided document.,what's the content of this file math.txt ?,d7c1bff7-80f2-4c29-9f38-71b538b77420
+avril,"2025-04-28T10:10:09.536Z","Okay, here's a summary of the topics covered in the provided documents:
+
+## Overview of Topics
+
+Based on the documents, here's a breakdown of the topics discussed:
+
+*   **Chatbot Overview:**
+    *   Introduction to a chatbot solution.
+    *   Problem statement the chatbot addresses.
+    *   Benefits of using the chatbot.
+    *   Explanation of how the chatbot works.
+    *   Implementation steps for the chatbot.
+    *   Expected outcomes from using the chatbot.
+    *   Conclusion.
+
+*   **User Guides for Online Stores:**
+
+    *   **Appliance Store Guide:**
+        *   Instructions for accessing and managing uploaded documents (Justificatifs de demande).
+        *   How to upload missing documents.
+        *   How to view already uploaded files.
+
+    *   **Vehicle Store Guide:**
+        *   Accessing the blog section (""Actualités/Blog"").
+        *   Navigating to the complete list of blog posts.
+        *   Elements of a blog post: image, title, description, and publication date.
+        *   Store contact information (address, phone, fax).",the topics into this text.txt ?,da10eae6-7504-4472-9107-53224540f152
+avril,"2025-04-27T16:17:40.949Z","Based on the provided documents, here's a summary of the topics:
+
+*   **ChatBot Technology:** One document discusses a ChatBot powered by BRI Technology.
+
+*   **User Guides:** Several documents are user guides for online stores, specifically:
+    *   A user guide for an appliance store.
+    *   Multiple user guides for a vehicle store.
+
+*   **Document Management:** The appliance store guide mentions uploading and viewing documents related to requests within a user profile.",BRI technology file topic ?,"3f211beb-2598-497f-a297-fa65a0d6057b"
+avril,"2025-04-27T16:06:41.513Z","The BRI Technology document discusses:
+
+- ChatBot
+- AI
+- Mohamed Amine Gnichi",BRI technology document is talking about what ?,"882ba6b2-5ed9-4750-b279-b36ba6d6df81"
+avril,"2025-04-27T15:37:17.412Z","Based on the provided files, I cannot determine the current date. The text files contain the date ""20-avril-2025"", and the PDF files do not contain date information.",today is what ?,cbe8f359-6c29-4dcd-b9ef-1957e8f8384c
+avril,"2025-04-27T15:18:44.601Z","Based on the provided context, here's a response to ""hello"":
+
+The text files contain the phrase ""bonjour le 20-avril-2025 16:26"".
+
+The PDF files appear to be excerpts from a ""Guided'Utilisationstorevéhicule"" (User Guide for Vehicle Store). They describe:
+
+- Contact information (Address, Telephone, Fax)
+- Blog details:
+  - How to access the blog
+  - Blog components (Image, Title, Description, Date of publication)",hello,"81012cb5-05d4-4a07-be63-94c139e8084c"
+avril,"2025-04-27T14:40:49.464Z","Based on the provided documents, here's a summary of what's on page 3:
+
+The document `/tmp/tmpcmdstru9.pdf`, `/tmp/tmp_8p2zjue.pdf`, `/tmp/tmpgy24y57f.pdf`, and `/tmp/tmpgfnlyk_0.pdf` are guides for using a vehicle store. Page 3 of these documents does not contain any relevant information.",page 3,"3dca5c5f-32ed-48c7-a91d-081c324d0c45"
+avril,"2025-04-27T14:39:58.123Z","I am sorry, I cannot answer the question because the provided documents do not contain information about page 17. However, I can provide information on ""Mes documents"" page.
+
+## Mes documents
+
+To view previously uploaded supporting documents, the client needs to access their profile and click on ""Mes documents."" This interface contains the following information for each document:
+
+- Reference
+- Offer
+- Color
+- Request date
+- Status
+- Action
+
+By clicking on ""the document,"" you can upload missing supporting documents and view already uploaded files.",contenu du page 17 du document guide vehicule,"3dca5c5f-32ed-48c7-a91d-081c324d0c45"
+avril,"2025-04-27T10:56:41.700Z","The last uploaded file provides a guide for using the ""Mes documents"" page for a vehicle store.
+
+Here's a summary:
+
+*   **Accessing Documents:** To view previously uploaded supporting documents, customers need to access their profile and click on ""Mes documents.""
+
+*   **Interface Information:** The ""Mes documents"" interface contains information for each document, including:
+
+    *   Reference
+    *   Offer
+    *   Color
+    *   Request date
+    *   Status
+    *   Action
+
+*   **Document Actions:** By clicking on ""the document,"" users can upload missing supporting documents and view already uploaded files.",give me a summarize for the last uploaded file,"4480fd31-3124-4097-b371-80201dd106ff"
+avril,"2025-04-27T10:44:58.119Z","Based on the provided context, here's a summary of what appears to be a vehicle guide:
+
+## Vehicle Guide
+
+- **Guided'Utilisationstorevéhicule:** This phrase appears to be the title or a key phrase indicating a guide for vehicle usage.
+
+- **MENU&Page:** This likely refers to a menu and page structure within the guide.
+
+- **MenuHorizontal:** Indicates a horizontal menu layout.
+
+- **Commentaires 136:** Suggests a comments section on page 136.
+
+- **Pourlepanier 69:** Indicates content related to ""the basket"" (likely a feature within the vehicle, or a metaphor for something) on page 69.",guide des vehicules,"4480fd31-3124-4097-b371-80201dd106ff"
+avril,"2025-04-26T19:00:33.764Z","Based on the provided context, it appears you're looking for the answer to a simple math problem.
+
+## Solution
+
+The answer to 5 + 5 is:
+
+- 10",math.txt,"0e58fcb9-944f-4b22-92fe-3775fca27810"
+avril,"2025-04-26T19:00:11.356Z",I need a file to provide the content and solve the math problem. Can you specify which file you are referring to?,what's the content of this file and solve the mathematics problem into it ,"0e58fcb9-944f-4b22-92fe-3775fca27810"
+avril,"2025-04-26T15:43:31.815Z","```html
+<div style=""font-family: Arial, sans-serif; margin: 20px; color: #333;"">
+
+  <section style=""margin-bottom: 30px;"">
+    <h2 style=""color: #0056b3; border-bottom: 1px solid #ccc; padding-bottom: 5px;"">Guided'Utilisationstoreélectroménager</h2>
+    <p><b>Page Mes documents:</b> Pour consulter les documents de Justificatifs de demande au paravant uploadé il faut que le client accède à son profil puis clique sur “Mes documents“ c’est une interface qui contient les informations de chaque document. On clique sur “le document” vous pouvez uploader les justificatifs manquants ainsi que voir les fichiers uploadés déjà.</p>
+    <p style=""font-size: smaller; color: #777;"">Page 47</p>
+  </section>
+
+  <section style=""margin-bottom: 30px;"">
+    <h2 style=""color: #0056b3; border-bottom: 1px solid #ccc; padding-bottom: 5px;"">Guided'Utilisationstoreélectroménager</h2>
+    <p>Pour consulter les demandes de financement et leur état d’avancement, il faut que le client accède à son profil puis clique sur “Suivre mes demandes“ c’est une interface qui contient les informations de chaque demande. Concernant la demande de l’ajout de la demande de financement d’un panier électroménager: On clique sur l'Icon du panier dans le box produit pour ajouter le produit dans le panier.</p>
+    <p style=""font-size: smaller; color: #777;"">Page 42</p>
+  </section>
+
+  <section style=""margin-bottom: 30px;"">
+    <h2 style=""color: #0056b3; border-bottom: 1px solid #ccc; padding-bottom: 5px;"">Guided'Utilisationstoreélectroménager</h2>
+    <p><b>Page Contacter un chargé:</b> Cet espace permet au client de spécifier:
+      <ul>
+        <li>La demande de financement: une liste de choix selon les demandes du client.</li>
+        <li>Choisir le motif: une liste de quatre choix
+          <ul>
+            <li>Demande d’information</li>
+            <li>Demande en attentende validation</li>
+            <li>Changement de prix de voiture</li>
+            <li>Changement d’autofinancement</li>
+          </ul>
+        </li>
+        <li>Écrire un message ne dépasse pas 250 caractères “c’est un champ obligatoire” pour l’envoyer au BackOffice.</li>
+      </ul>
+      Le client clique sur le bouton ”Envoyer ou Annuler”.</p>
+    <p style=""font-size: smaller; color: #777;"">Page 53</p>
+  </section>
+
+  <section style=""margin-bottom: 30px;"">
+    <h2 style=""color: #0056b3; border-bottom: 1px solid #ccc; padding-bottom: 5px;"">Guided'Utilisationstoreélectroménager</h2>
+    <p>Pour suivre les rendez-vous, il faut que le client accède à son espace privé puis clique sur “Suivre RDV“ c’est une interface qui contient un calendrier des rendez-vous du client.</p>
+    <p style=""font-size: smaller; color: #777;"">Page 52</p>
+  </section>
+
+  <section style=""margin-bottom: 30px;"">
+    <h2 style=""color: #0056b3; border-bottom: 1px solid #ccc; padding-bottom: 5px;"">GOOGLE MEENA</h2>
+    <p>5.2 GOOGLE MEENA ................................................................................................................................... 28
+      <ul>
+        <li>5.2.1 Human Likeness ............................................................................................................................ 28</li>
+        <li>5.2.2 Training Data ................................................................................................................................ 28</li>
+        <li>5.2.3 Model Architecture........................................................................................................................ 29</li>
+      </ul>
+    </p>
+    <p>5.3 OTHER APPLICATIONS........................................................................................................................... 29</p>
+    <p>5.4 IMPLICATIONS AND FUTURE OUTLOOK ................................................................................................ 30</p>
+  </section>
+
+</div>
+```",give me the content of this file and reply on it,
+avril,"2025-04-26T15:39:28.271Z","```html
+<div style=""font-family: Arial, sans-serif; padding: 20px;"">
+  <section style=""margin-bottom: 15px;"">
+    <h2 style=""color: #333; font-size: 1.5em;"">Question:</h2>
+    <p style=""font-size: 1.1em;"">5+5 ?</p>
+  </section>
+
+  <section>
+    <h2 style=""color: #333; font-size: 1.5em;"">Answer:</h2>
+    <p style=""font-size: 1.2em; font-weight: bold; color: #007BFF;"">5 + 5 = 10</p>
+  </section>
+
+  <section style=""margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;"">
+    <p style=""font-size: 0.9em; color: #777;"">Answer provided based on basic arithmetic principles.</p>
+  </section>
+</div>
+```","5+5 ?",
+avril,"2025-04-26T15:39:01.154Z","```html
+<div style=""font-family: Arial, sans-serif; margin: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;"">
+  <h1 style=""color: #333; font-size: 24px; margin-bottom: 15px;"">Response to ""hello""</h1>
+  <p style=""color: #555; line-height: 1.6;"">
+    Based on the provided context, the query ""hello"" appears in the following text files:
+  </p>
+  <ul style=""list-style-type: disc; margin-left: 20px; color: #555;"">
+    <li>/tmp/tmp3xpyl7ev.txt: bonjour le 20-avril-2025 16:26</li>
+    <li>/tmp/tmpo4ckiogh.txt: bonjour le 20-avril-2025 16:26</li>
+  </ul>
+  <p style=""color: #555; line-height: 1.6;"">
+    The PDF files contain information about a vehicle user guide, specifically detailing blog functionalities such as accessing blog posts via the ""Actualités"" menu or the ""Actualités/Blog"" section on the ""Home"" page. Each blog post includes an image, title, description, and publication date.
+  </p>
+</div>
+```",hello,
+avril,"2025-04-25T19:29:09.567Z","<div class='error'>Gemini error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: ""generativelanguage.googleapis.com/generate_content_free_tier_requests""
+  quota_id: ""GenerateRequestsPerMinutePerProjectPerModel-FreeTier""
+  quota_dimensions {
+    key: ""model""
+    value: ""gemini-2.0-flash""
+  }
+  quota_dimensions {
+    key: ""location""
+    value: ""global""
+  }
+  quota_value: 15
+}
+, links {
+  description: ""Learn more about Gemini API quotas""
+  url: ""https://ai.google.dev/gemini-api/docs/rate-limits""
+}
+, retry_delay {
+  seconds: 50
+}
+]</div>",the last uploaded file ?,
+avril,"2025-04-24T10:43:49.361Z","```html
+<div style=""font-family: Arial, sans-serif; line-height: 1.6; color: #333;"">
+  <section style=""margin-bottom: 20px;"">
+    <h2 style=""color: #0056b3; font-size: 1.5em; margin-bottom: 10px;"">Content of Uploaded Files</h2>
+    <p>Users can upload files in either <code>.pdf</code> or <code>.txt</code> formats.</p>
+    <p>
+      When a user clicks on ""le document,"" they can upload missing supporting documents and view the files already uploaded.
+    </p>
+    <p>
+      Uploaded documents are parsed using either <code>PyPDFLoader</code> (for .pdf files) or <code>UnstructuredFileLoader</code>.
+    </p>
+  </section>
+</div>
+```",content of the uploaded file ?,
+avril,"2025-04-24T09:38:48.265Z",<div class='error'>Could not extract clean response.</div>,the content of this file ?,
+avril,"2025-04-21T09:10:42.076Z","content='```html\n<div style=""font-family: Arial, sans-serif; margin: 20px;"">\n  <h2 style=""color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px;"">Latest News</h2>\n\n  <section>\n    <p>Here\'s a summary of the latest news and blog updates:</p>\n    <ul>\n      <li><b>All News:</b> A comprehensive list of all news articles.</li>\n      <li><b>Blog Posts:</b> Each blog post includes:\n        <ul>\n          <li>An Image</li>\n          <li>A Title</li>\n          <li>A Description</li>\n          <li>A Publication Date</li>\n        </ul>\n      </li>\n    </ul>\n  </section>\n</div>\n```' additional_kwargs={} response_metadata={'prompt_feedback': {'block_reason': 0, 'safety_ratings': []}, 'finish_reason': 'STOP', 'safety_ratings': []} id='run-51b8c46c-1936-43b9-aa07-8231b25edfc7-0' usage_metadata={'input_tokens': 166, 'output_tokens': 197, 'total_tokens': 363, 'input_token_details': {'cache_read': 0}}",whats news ?,
+avril,"2025-04-21T08:44:49.875Z","content='```html\n<div style=""font-family: Arial, sans-serif; padding: 20px;"">\n  <section style=""margin-bottom: 15px;"">\n    <h2 style=""color: #333; font-size: 1.2em;"">Model Used</h2>\n    <p style=""line-height: 1.6;"">I use Gemini 2.0 Flash, accessed via <code>langchain_google_genai.ChatGoogleGenerativeAI</code>.</p>\n  </section>\n</div>\n```' additional_kwargs={} response_metadata={'prompt_feedback': {'block_reason': 0, 'safety_ratings': []}, 'finish_reason': 'STOP', 'safety_ratings': []} id='run-9535e2f9-7caa-432a-a1ef-5b88529cc943-0' usage_metadata={'input_tokens': 185, 'output_tokens': 122, 'total_tokens': 307, 'input_token_details': {'cache_read': 0}}",which model you use ?,
+avril,"2025-04-21T08:43:11.413Z","content='```html\n<div style=""font-family: Arial, sans-serif; margin: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;"">\n  <section>\n    <h2 style=""color: #333; margin-bottom: 15px;"">Last Uploaded File Content</h2>\n    <div style=""line-height: 1.6; color: #555;"">\n      <p>les fichiers uploadés déjà.</p>\n    </div>\n  </section>\n</div>\n```' additional_kwargs={} response_metadata={'prompt_feedback': {'block_reason': 0, 'safety_ratings': []}, 'finish_reason': 'STOP', 'safety_ratings': []} id='run-b5c8d858-25ce-43d3-ae6a-3e1a1c7c7ae5-0' usage_metadata={'input_tokens': 167, 'output_tokens': 144, 'total_tokens': 311, 'input_token_details': {'cache_read': 0}}",the last uploaded file content,
+avril,"2025-04-21T08:35:36.495Z","content='```html\n<div style=""font-family: Arial, sans-serif; margin: 20px;"">\n\n  <section style=""margin-bottom: 15px;"">\n    <h2 style=""color: #333; font-size: 1.2em;"">File Upload and Processing</h2>\n    <p style=""line-height: 1.6;"">\n      Users, like avril, can upload files in either <code>.pdf</code> or <code>.txt</code> formats directly through the interface.\n    </p>\n  </section>\n\n  <section style=""margin-bottom: 15px;"">\n    <h2 style=""color: #333; font-size: 1.2em;"">Document Parsing and Chunking</h2>\n    <p style=""line-height: 1.6;"">\n      Uploaded documents are parsed using either <code>PyPDFLoader</code> (for .pdf files) or <code>UnstructuredFileLoader</code>. The resulting content is then split into smaller chunks using <code>RecursiveCharacterTextSplitter</code>.\n    </p>\n  </section>\n\n</div>\n```' additional_kwargs={} response_metadata={'prompt_feedback': {'block_reason': 0, 'safety_ratings': []}, 'finish_reason': 'STOP', 'safety_ratings': []} id='run-ae4c55c0-a279-49a6-9702-617fc55011f9-0' usage_metadata={'input_tokens': 225, 'output_tokens': 245, 'total_tokens': 470, 'input_token_details': {'cache_read': 0}}",test file content,
+avril,"2025-04-21T08:32:19.608Z","content='```html\n<div style=""font-family: Arial, sans-serif; line-height: 1.6; color: #333;"">\n  <section style=""margin-bottom: 20px;"">\n    <h2 style=""color: #0056b3; border-bottom: 1px solid #ccc; padding-bottom: 5px;"">Document Content Summary</h2>\n    <p>\n      The document outlines the current capabilities of the system, both technical and user-facing.\n    </p>\n  </section>\n\n  <section style=""margin-bottom: 20px;"">\n    <h3 style=""color: #007bff;"">Key Technical Capabilities Mentioned:</h3>\n    <ul style=""list-style-type: disc; margin-left: 20px;"">\n      <li>Authentication</li>\n      <li>Dynamic file upload and parsing</li>\n      <li>Semantic caching</li>\n      <li>Multi-retriever ensemble logic</li>\n      <li>Vector storage indexing</li>\n      <li>Persistent chat history tracking</li>\n    </ul>\n  </section>\n\n  <section>\n    <p>\n      The document serves as a foundation for future iterations and optimizations of the system.\n    </p>\n  </section>\n</div>\n```' additional_kwargs={} response_metadata={'prompt_feedback': {'block_reason': 0, 'safety_ratings': []}, 'finish_reason': 'STOP', 'safety_ratings': []} id='run-3bfd5030-4780-4adb-ab5d-85f85c73a48c-0' usage_metadata={'input_tokens': 299, 'output_tokens': 303, 'total_tokens': 602, 'input_token_details': {'cache_read': 0}}",the content of the test file ?,
+avril,"2025-04-21T08:23:18.015Z","content='```html\n<div style=""font-family: Arial, sans-serif; line-height: 1.6; color: #333;"">\n  <section style=""margin-bottom: 20px;"">\n    <h2 style=""color: #0056b3; border-bottom: 1px solid #ccc; padding-bottom: 5px;"">File Content Summary</h2>\n    <p>The file content includes information related to:</p>\n    <ul style=""list-style-type: disc; margin-left: 20px;"">\n      <li>Authentication</li>\n      <li>Dynamic file upload and parsing</li>\n      <li>Semantic caching</li>\n      <li>Multi-retriever ensemble logic</li>\n      <li>Vector storage indexing</li>\n      <li>Persistent chat history tracking</li>\n    </ul>\n  </section>\n</div>\n```' additional_kwargs={} response_metadata={'prompt_feedback': {'block_reason': 0, 'safety_ratings': []}, 'finish_reason': 'STOP', 'safety_ratings': []} id='run-9b1dd2c0-4de4-4fab-825e-996915f03001-0' usage_metadata={'input_tokens': 219, 'output_tokens': 211, 'total_tokens': 430, 'input_token_details': {'cache_read': 0}}",what's the content of the file ?,
+avril,"2025-04-21T07:46:11.745Z","content='```html\n<div style=""font-family: Arial, sans-serif; padding: 20px;"">\n  <section style=""margin-bottom: 20px;"">\n    <h2 style=""color: #333; font-size: 1.5em;"">First Word in the Text File</h2>\n    <p style=""line-height: 1.6;"">\n      The first word in the provided text file is: \n      <strong style=""color: #007BFF;"">bonjour</strong>.\n    </p>\n  </section>\n</div>\n```' additional_kwargs={} response_metadata={'prompt_feedback': {'block_reason': 0, 'safety_ratings': []}, 'finish_reason': 'STOP', 'safety_ratings': []} id='run-afef982b-b977-4f24-a54c-48d1643f7821-0' usage_metadata={'input_tokens': 134, 'output_tokens': 131, 'total_tokens': 265, 'input_token_details': {'cache_read': 0}}",first word into the test file,
+avril,"2025-04-21T07:28:40.092Z","content='```html\n<div style=""font-family: Arial, sans-serif; padding: 10px;"">\n  <section style=""margin-bottom: 15px;"">\n    <h2 style=""font-size: 1.2em; color: #333;"">Date Detection</h2>\n    <p>\n      <strong style=""color: #007BFF;"">Question:</strong> Does the provided content contain any date?\n    </p>\n  </section>\n\n  <section>\n    <p>\n      <strong style=""color: #007BFF;"">Answer:</strong> Yes, the content contains the date ""le 20-avril-2025"".\n    </p>\n  </section>\n</div>\n```' additional_kwargs={} response_metadata={'prompt_feedback': {'block_reason': 0, 'safety_ratings': []}, 'finish_reason': 'STOP', 'safety_ratings': []} id='run-46875880-932d-4392-bcde-af8dc0d3b39b-0' usage_metadata={'input_tokens': 150, 'output_tokens': 169, 'total_tokens': 319, 'input_token_details': {'cache_read': 0}}",does it contains any date ?,
+avril,"2025-04-21T07:28:11.643Z","content='```html\n<div style=""font-family: Arial, sans-serif; padding: 20px;"">\n  <section style=""margin-bottom: 15px;"">\n    <h2 style=""color: #333; font-size: 1.2em; margin-bottom: 10px;"">Question:</h2>\n    <p style=""color: #555;"">test file first word</p>\n  </section>\n\n  <section>\n    <h2 style=""color: #333; font-size: 1.2em; margin-bottom: 10px;"">Answer:</h2>\n    <p style=""color: #555;"">The first word in the provided file is: <strong style=""color: #007BFF;"">bonjour</strong>.</p>\n  </section>\n</div>\n```' additional_kwargs={} response_metadata={'prompt_feedback': {'block_reason': 0, 'safety_ratings': []}, 'finish_reason': 'STOP', 'safety_ratings': []} id='run-854f4a0a-9c70-430f-a35d-bdbe2bd86bad-0' usage_metadata={'input_tokens': 132, 'output_tokens': 191, 'total_tokens': 323, 'input_token_details': {'cache_read': 0}}",test file first word,
+avril,"2025-04-21T04:27:43.866Z","content='```html\n<div style=""font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 5px;"">\n  <h2 style=""color: #333; margin-bottom: 15px;"">Test File Content</h2>\n  <section>\n    <p style=""line-height: 1.6; color: #555;"">\n      The content of the test file is:\n    </p>\n    <pre style=""background-color: #f9f9f9; padding: 10px; border: 1px solid #eee; border-radius: 3px; overflow-x: auto;"">bonjour le 20-avril-2025 16:26</pre>\n  </section>\n</div>\n```' additional_kwargs={} response_metadata={'prompt_feedback': {'block_reason': 0, 'safety_ratings': []}, 'finish_reason': 'STOP', 'safety_ratings': []} id='run-9969449c-4824-49f6-9fbf-a22dc8e4bd52-0' usage_metadata={'input_tokens': 150, 'output_tokens': 190, 'total_tokens': 340, 'input_token_details': {'cache_read': 0}}",content of the test file,
+amine,"2025-05-02T09:13:34.967Z","The topics in the file are:
+
+- Authentication
+- Dynamic file upload and parsing
+- Semantic caching
+- Multi-retriever ensemble logic
+- Vector storage indexing
+- Persistent chat history tracking
+- Introduction
+- The Problem
+- Our Solution : ChatBot
+- Benefits
+- How it Works
+- Implementation Steps
+- Expected Outcomes
+- Conclusion",whats the topics into the file ?,"0893ee8f-0a28-44b3-ad7f-4361170e3193"
+amine,"2025-04-30T15:03:18.001Z",The requested information was not found in the provided document.,how many documents found into the astradb ?,dda29842-4c72-4d0c-92fb-78d23e0674ea
+amine,"2025-04-30T15:02:31.992Z","The document provides information on how to use a vehicle store and an appliance store. Here's a summary of how the document describes the functionality of each:
+
+### Vehicle Store
+
+*   **Actualités/BLOG Section:** ""La section Actualités/BLOG contient les derniers blogs récemment ajoutés avec leur image et une petite description.""
+    *   You can read the full blog by clicking the ""Lire la suite"" button.
+    *   You can access a list of all blogs by clicking the ""Afficher plus"" button.
+*   **FAQ Section:** ""La section FAQ contient une liste des questions fréquentes. Le cliques sur le bouton “flèche” pour afficher les réponses aux questions.""
+
+### Appliance Store
+
+*   **Tableau de bord (Dashboard):** ""Le tableau de bord contient toutes les informations du compte de client et ses dernières modifications sous forme des box.""
+    *   Financement: ""affiche le nombre de financement en cours.""
+    *   Favoris: ""affiche le nombre de voiture qui sont favorisées.""
+    *   Notifications non lues: ""affiche le nombre des notifications non lus.""
+    *   Simulateur: ""pour naviguer vers l’espace de simulation.""
+    *   Mes dernières simulations: ""affiche les dernières simulations faites par le client.""
+    *   Mes rendez-vous: ""affiche les rendez-vous du client.""
+    *   Etat d'avancement de vos financements: ""affiche l’état de l’avancement du financement de chaque store.""",how you can help me ?,dda29842-4c72-4d0c-92fb-78d23e0674ea
+amine,"2025-04-30T15:02:00.790Z",The requested information was not found in the provided document.,this is not the file i asked for ,dda29842-4c72-4d0c-92fb-78d23e0674ea
+amine,"2025-04-30T14:47:30.348Z","The file contains guided utilization instructions for stores, specifically regarding the ""Mes documents"" section. There are instructions for both ""électroménager"" (appliances) and ""véhicule"" (vehicle) stores.
+
+## Mes documents
+
+The ""Mes documents"" section allows customers to:
+
+- Consult previously uploaded ""Justificatifs de demande"" (supporting documents for requests).
+- Access their profile and click on ""Mes documents.""
+- View an interface containing information for each document.
+
+For vehicle stores, the document information includes:
+
+- La référence (Reference)
+- L’offre (Offer)
+- La couleur (Color)
+- La date de demande (Request date)
+- L’état (Status)
+- L'action (Action)
+
+In both appliance and vehicle stores, by clicking on ""le document"" (the document), users can:
+
+- Upload missing supporting documents.
+- View already uploaded files.",what's the content of this file ?,dda29842-4c72-4d0c-92fb-78d23e0674ea

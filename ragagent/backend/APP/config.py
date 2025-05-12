@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     TOP_K_RESULTS: int = 3
     SECRET_KEY: str = Field(..., env="SECRET_KEY")
     ALGORITHM: str = Field(..., env="ALGORITHM")
+    CACHE_THRESHOLD: float = 0.7
+
 
     class Config:
         env_file = ".env"

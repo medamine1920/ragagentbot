@@ -9,7 +9,11 @@ from rag_agent import RAGAgent
 from services.auth_service import hash_password
 from services.semantic_cache import SemanticCache  # Make sure this is imported
 from utils.text_classification import guess_domain_from_text
-
+from services.cassandra_connector import CassandraConnector
+from nlp_processor import ChatCategorizer
+from datetime import datetime
+import uuid
+from uuid import UUID
 import logging
 import os
 
@@ -28,18 +32,44 @@ templates = Jinja2Templates(directory="frontend/templates")
 logger = logging.getLogger("ragagent")
 logging.basicConfig(level=logging.INFO)
 
+#categorizer = ChatCategorizer()
+
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request, current_user: UserInDB = Depends(auth_service.get_current_user)):
     return templates.TemplateResponse("interface.html", {"request": request, "user": current_user})
 
 @app.post("/login", response_model=Token)
 async def login_user(
+    request: Request,  # 👈 To get IP & User-Agent
     response: Response,
     form_data: OAuth2PasswordRequestForm = Depends()
 ):
-    token = await auth_service.login_for_access_token(response, form_data)
-    # 👇 Return the token in the JSON so Postman can grab it
-    return token
+    ip_address = request.client.host
+    user_agent = request.headers.get("user-agent", "unknown")
+
+    try:
+        token = await auth_service.login_for_access_token(response, form_data)
+
+        # ✅ Log successful login
+        db.log_login_attempt(
+            username=form_data.username,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            successful=True
+        )
+
+        return token
+
+    except Exception as e:
+        # ❌ Log failed login
+        db.log_login_attempt(
+            username=form_data.username,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            successful=False
+        )
+
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
 @app.post("/register")
 async def register(
@@ -103,39 +133,51 @@ async def upload_file(
 async def chat_post(
     request: Request,
     question: str = Form(...),
+    session_id: str = Form(None),  # allow optional
+    source_filename: str = Form(None),  # accept uploaded file name
     current_user: UserInDB = Depends(auth_service.get_current_user)
 ):
+    rag_agent = RAGAgent()
     try:
-        # ✅ Step 1: Try cache first
+        # ✅ Step 1: Try semantic cache first
         cached_answer = await semantic_cache.search(question)
         if cached_answer:
+            logger.info(f"✅ Semantic Cache HIT for: {question[:50]}...")
             return {
                 "question": question,
                 "answer": cached_answer,
                 "sources": [],
-                "confidence": 1.0,  # full confidence for cached answer
+                "confidence": 1.0,
                 "source_type": "cache"
             }
 
-        # ✅ Step 2: Fallback to LLM if not cached
+        # ✅ Step 2: Fallback to RAG
+        user_context = {
+            "name": current_user.username,
+            "role": current_user.his_job,
+            "session_id": session_id,
+            "source_filename": source_filename  # Very important
+        }
+
         response_data = await rag_agent.generate_response(
             question,
-            {"name": current_user.username, "role": current_user.his_job}
+            user_context
         )
 
         # ✅ Step 3: Store answer in cache
         await semantic_cache.store(question, response_data["answer"])
 
-        # ✅ Step 4: Return with fallback confidence value if missing
+        # ✅ Step 4: Return clean result
         return {
             "question": question,
             "answer": response_data["answer"],
             "sources": response_data.get("sources", []),
-            "confidence": float(response_data.get("confidence", 0.7)),  # default if not provided
+            "confidence": float(response_data.get("confidence", 0.7)),
             "source_type": response_data.get("source_type", "llm")
         }
 
     except Exception as e:
+        logger.error(f"❌ Error in chat_post: {e}")
         return {
             "question": question,
             "answer": "<div class='error'>Sorry, something went wrong.</div>",
@@ -143,9 +185,10 @@ async def chat_post(
             "confidence": 0.0,
             "source_type": "error"
         }
+        
+        
 
-    
-    
+
 @app.get("/debug")
 async def debug_uploaded_chunks():
     try:
@@ -159,5 +202,60 @@ async def debug_uploaded_chunks():
 async def get_history(session_id: str, current_user: UserInDB = Depends(auth_service.get_current_user)):
     history = db.get_chat_history(session_id)
     return {"history": history}
+
+@app.get("/sessions")
+async def get_sessions(user: str = Query(...)):
+    query = """
+    SELECT session_id, title, timestamp FROM sessions WHERE username = %s ALLOW FILTERING
+    """
+    #rows = CassandraConnector.session.execute(query, (user,))
+    db = CassandraConnector()
+    rows = db.session.execute(query, (user,))
+
+    sessions = []
+    for row in rows:
+        sessions.append({
+            "session_id": str(row.session_id),
+            "title": row.title,
+            "timestamp": str(row.timestamp)
+        })
+    
+    return {"sessions": sessions}
+
+
+@app.post("/register_session")
+async def register_session(
+    session_id: str = Form(...),
+    title: str = Form(...),
+    username: str = Form(...)
+):
+    logger = logging.getLogger(__name__)
+    
+    timestamp = datetime.utcnow()
+
+    try:
+        query = """
+        INSERT INTO sessions (session_id, title, username, timestamp)
+        VALUES (%s, %s, %s, %s)
+        """
+
+        cassandra = CassandraConnector()
+        cassandra.session.execute(query, (UUID(session_id), title, username, timestamp))
+        logger.info(f"✅ Session saved for {username}: {title}")
+        return {"message": "Session registered successfully"}
+
+    except Exception as e:
+        logger.error(f"❌ Failed to register session: {e}")
+        return {"detail": f"Session registration failed: {str(e)}"}
+    
+    
+    
+#@app.post("/nlp/update")
+#def update_categories():
+#    categorizer.predict_and_save()
+#    return {"message": "Categories updated successfully"}
+
+
+
 
 

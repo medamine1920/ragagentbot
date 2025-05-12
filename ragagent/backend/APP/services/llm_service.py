@@ -17,6 +17,7 @@ class GeminiService:
 
     async def generate(self, prompt: str) -> str:
         try:
+            logger.warning(f"📡 Gemini called for prompt: {prompt[:100]}")  # Log Gemini usage
             return self.llm.invoke(prompt)
         except Exception as e:
             return f"<div class='error'>Gemini error: {str(e)}</div>"
