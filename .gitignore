@@ -4,36 +4,43 @@ __pycache__/
 *.so
 *.pyd
 
-# Virtual environments
-ragagent/Lib/
-ragagent/Scripts/
-ragagent/Include/
-ragagent/pyvenv.cfg
-ragagent/.env
-ragagent/share/
-ragagent/etc/
+# Virtual environments and libraries
 
-# Jupyter, Streamlit, and temp data
-share/
+
+Lib/
+models/
+__pycache__/
+*.pyc
+.venv/
+env/
 etc/
-.ipynb_checkpoints/
-*.log
-*.tmp
+*.pkl
 
-# Ignore secrets and environment files
+# Local app/model/output folders
+models/
+documents/
+etc/
+
+# Environment secrets
 .env
 .env.*
 
-# IDE and Editor settings
+# Logs, cache, temp files
+*.log
+*.tmp
+.history*
+.ipynb_checkpoints/
+
+# Editor settings
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# OS-specific files
+# OS junk
 .DS_Store
 Thumbs.db
 
-# Project-specific
-documents/
+# Node-related (if used)
 node_modules/
+models/
