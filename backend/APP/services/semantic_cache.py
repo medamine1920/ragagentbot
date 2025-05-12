@@ -14,7 +14,7 @@ class SemanticCache:
     def __init__(self, embedding_model):
         self.embedder = embedding_model  # HuggingFace embedding model
         self.db = CassandraConnector()
-        self.index = faiss.IndexFlatL2(1024)  # Adjust to your embedding size
+        self.index = faiss.IndexFlatL2(1024)  # Adjust embedding size
         self.id_map = {}
         self.memory = {}  # Optional in-memory cache
         self._load_cache()

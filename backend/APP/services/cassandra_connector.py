@@ -46,10 +46,14 @@ class CassandraConnector:
 
         self.cluster = Cluster(contact_points=[self.CASSANDRA_HOST], port=self.CASSANDRA_PORT)
         self.session = self._initialize_session()
+        logger.info("✅ Cassandra session initialized successfully.")
         self._initialize_schema()
 
     def __enter__(self):
         return self
+    
+    #def get_session(self):
+        #return self.session
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Clean up resources on context exit"""
@@ -66,8 +70,9 @@ class CassandraConnector:
             idle_heartbeat_interval=30
         )
         session = cluster.connect()
-        session.set_keyspace(self.KEYSPACE)  # ✅ Add this line
+        session.set_keyspace(self.KEYSPACE)
         cassio.init(session=session, keyspace=self.KEYSPACE)
+        logger.info(f"🚀 Connecting to Cassandra at {self.CASSANDRA_HOST}:{self.CASSANDRA_PORT}")
         return session
 
     def _initialize_schema(self):

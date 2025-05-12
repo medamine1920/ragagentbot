@@ -4,13 +4,34 @@ import os
 import uuid
 import time
 from datetime import datetime
+from datetime import timedelta
+from cassandra.cluster import Cluster
+import pandas as pd
+
+
 #from services.cassandra_connector import CassandraConnector
 
-st.set_page_config(page_title="🧠 RAG Agent", layout="wide")
+st.set_page_config(page_title="🧠 BRI Chat Assistant", layout="wide")
 
 API_HOST = os.getenv("API_HOST", "ragagentbot")
 API_PORT = os.getenv("API_PORT", "8000")
 BASE_URL = f"http://{API_HOST}:{API_PORT}"
+
+# ---------------- Header with user info & logout ----------------
+if st.session_state.get("username"):
+    with st.container():
+        cols = st.columns([6, 1])
+        cols[0].markdown(f"👤 **Logged in as:** `{st.session_state.username}`")
+        if cols[1].button("🚪 Logout"):
+            try:
+                # Call backend to clear cookie if applicable
+                res = requests.get(f"{BASE_URL}/logout", headers={"Authorization": f"Bearer {st.session_state.token}"})
+            except:
+                pass
+            # Clear session
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+            st.rerun()
 
 # ---------------- Initialize Session ----------------
 if "token" not in st.session_state:
@@ -27,12 +48,24 @@ if "waiting_for_response" not in st.session_state:
     st.session_state.waiting_for_response = False
 if "sessions" not in st.session_state:
     st.session_state.sessions = []
+if "auto_loaded" not in st.session_state:
+    st.session_state.auto_loaded = False
+if "mode" not in st.session_state:
+    st.session_state.mode = "chat"
+
+mode = st.sidebar.radio("🧭 Navigation", ["Chat", "Dashboard"])
+st.session_state.mode = "chat" if mode == "Chat" else "dashboard"
+
 
 headers = {"Authorization": f"Bearer {st.session_state.token}"}
 
 # ---------------- Theme Toggle + Styling ----------------
 st.sidebar.title("⚙️ Settings")
 st.sidebar.toggle("🌗 Dark Mode", key="dark_mode", value=True)
+
+if st.session_state.get("last_uploaded_filename"):
+    st.sidebar.caption(f"📄 Chatting with: `{st.session_state.last_uploaded_filename}`")
+
 
 dark_mode = st.session_state.dark_mode
 st.markdown("""
@@ -90,30 +123,56 @@ except:
 # ---------------- Sidebar Sessions ----------------
 st.sidebar.title("📚 Your Chats")
 
+# ➕ New conversation button
 if st.sidebar.button("➕ New Conversation"):
     st.session_state.session_id = str(uuid.uuid4())
     st.session_state.history = []
     st.session_state.session_title = None
-    st.rerun()  # ✅ Correct way to refresh the app
+    st.session_state.last_uploaded_filename = None
+    st.rerun()
 
-# List old sessions
-if st.session_state.sessions:
-    st.session_state.sessions.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+# Grouping helper
+today = datetime.utcnow().date()
+yesterday = today - timedelta(days=1)
 
-    for session in st.session_state.sessions:
-        if st.sidebar.button(session["title"]):
-            st.session_state.session_id = session["session_id"]
-            st.session_state.session_title = session["title"]
+grouped_sessions = {
+    "Today": [],
+    "Yesterday": [],
+    "Previous 7 Days": []
+}
 
-            # Load old history
-            try:
-                res = requests.get(f"{BASE_URL}/history?session_id={session['session_id']}", headers=headers)
-                if res.ok:
-                    st.session_state.history = res.json().get("history", [])
-                    st.success(f"✅ Loaded {len(st.session_state.history)} messages from '{session['title']}'")
-                    st.rerun()  # ✅ refresh chat area to reflect old history
-            except Exception as e:
-                st.warning(f"⚠️ Could not load chat history: {str(e)}")
+for session in st.session_state.sessions:
+    try:
+        ts = datetime.strptime(session["timestamp"], "%Y-%m-%d %H:%M:%S.%f")
+    except:
+        continue
+
+    if ts.date() == today:
+        grouped_sessions["Today"].append(session)
+    elif ts.date() == yesterday:
+        grouped_sessions["Yesterday"].append(session)
+    elif ts.date() >= today - timedelta(days=7):
+        grouped_sessions["Previous 7 Days"].append(session)
+
+# Render each group
+for label, sessions in grouped_sessions.items():
+    if sessions:
+        st.sidebar.markdown(f"**{label}**")
+        for session in sorted(sessions, key=lambda x: x["timestamp"], reverse=True):
+            if st.sidebar.button(session["title"], key=session["session_id"]):
+                st.session_state.session_id = session["session_id"]
+                st.session_state.session_title = session["title"]
+
+                try:
+                    res = requests.get(
+                        f"{BASE_URL}/history?session_id={session['session_id']}",
+                        headers=headers
+                    )
+                    if res.ok:
+                        st.session_state.history = res.json().get("history", [])
+                        st.rerun()
+                except Exception as e:
+                    st.warning(f"⚠️ Could not load chat history: {str(e)}")
 
 
 
@@ -133,6 +192,8 @@ with st.form("upload_form"):
 
                     if res.ok:
                         st.toast("✅ File uploaded and processing started!", icon='🎉')
+                        st.session_state.last_uploaded_filename = file.name
+                        
                     else:
                         error_detail = res.json().get("detail", "Upload failed.")
                         st.error(f"❌ Upload failed: {error_detail}")
@@ -158,10 +219,11 @@ if not st.session_state.waiting_for_response:
     question = st.chat_input("Type your question...")
 
     if question:
-        if not st.session_state.session_title:
+        # ⬇️ Save the first question as title and register the session
+        is_first_message = not st.session_state.session_title
+        if is_first_message:
             st.session_state.session_title = question[:30] + "..." if len(question) > 30 else question
 
-            # ✅ Save session and re-fetch sidebar after first message
             try:
                 requests.post(f"{BASE_URL}/register_session", data={
                     "session_id": st.session_state.session_id,
@@ -169,13 +231,15 @@ if not st.session_state.waiting_for_response:
                     "username": st.session_state.username
                 }, headers=headers)
 
-                # Refresh sessions
+                # 🔁 Refresh sidebar sessions after saving the session
                 res = requests.get(f"{BASE_URL}/sessions?user={st.session_state.username}", headers=headers)
                 if res.ok:
                     st.session_state.sessions = res.json().get("sessions", [])
+                    st.rerun()  # ⬅️ Force rerun to reload sidebar with new session
             except:
                 st.warning("⚠️ Failed to register or refresh sessions.")
 
+        #regular chat flow
         st.session_state.waiting_for_response = True
         st.session_state.history.append({"role": "user", "message": question})
 
@@ -186,32 +250,90 @@ if not st.session_state.waiting_for_response:
             placeholder = st.empty()
             with st.spinner("🤖 Thinking..."):
                 try:
-                    res = requests.post(f"{BASE_URL}/chat", data={"question": question, "session_id": st.session_state.session_id}, headers=headers, timeout=60)
-
+                    res = requests.post(f"{BASE_URL}/chat", data={
+                        "question": question,
+                        "session_id": st.session_state.session_id,
+                        "source_filename": st.session_state.get("last_uploaded_filename")
+                    }, headers=headers, timeout=60)
+                    
                     if res.ok:
                         data = res.json()
                         answer = data.get("answer", "No answer returned.")
                         st.session_state.history.append({"role": "assistant", "message": answer})
 
-                        # Typing animation
-                        for dots in ["", ".", "..", "..."]:
-                            placeholder.markdown(f"Assistant is typing{dots}")
-                            time.sleep(0.4)
+                        # ✅ Display full markdown (with sources)
                         placeholder.markdown(answer, unsafe_allow_html=True)
+
                     else:
-                        placeholder.error("❌ Failed to get a response.")
+                        error_detail = res.json().get("answer", "Error occurred.")
+                        placeholder.error(error_detail)
+
                 except Exception as e:
                     placeholder.error(f"❌ Backend unreachable: {str(e)}")
 
-        # Auto-scroll after sending
-        st.markdown("""
-            <script>
-            var chatBox = window.parent.document.querySelector('.element-container');
-            if (chatBox) { chatBox.scrollTop = chatBox.scrollHeight; }
-            </script>
-        """, unsafe_allow_html=True)
-
         st.session_state.waiting_for_response = False
 
-# ---------------- Footer ----------------
-st.markdown("<div class='footer'>© 2025 RAG Agent | Built by Amine</div>", unsafe_allow_html=True)
+# ---------------- RENDER MAIN VIEW ----------------
+if st.session_state.mode == "chat":
+    # Your existing chat logic already defined above (nothing to change here)
+    st.markdown("<div class='footer'>© 2025 RAG Agent | Built by Amine</div>", unsafe_allow_html=True)
+
+elif st.session_state.mode == "dashboard":
+    st.title("📊 Chat Dashboard")
+
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+        CASSANDRA_HOST = os.getenv("CASSANDRA_HOSTS", "cassandra")
+        CASSANDRA_PORT = int(os.getenv("CASSANDRA_PORT", "9042"))
+        KEYSPACE = os.getenv("CASSANDRA_KEYSPACE", "rag_keyspace")
+        cluster = Cluster(contact_points=[CASSANDRA_HOST], port=CASSANDRA_PORT)
+        cass_session = cluster.connect(KEYSPACE)
+        
+        #cluster = Cluster(contact_points=["localhost"])
+        #cass_session = cluster.connect("rag_keyspace")
+        #db = CassandraConnector()
+        #cass_session = db.session
+
+        days = st.sidebar.slider("📅 Show data from last N days", min_value=1, max_value=30, value=7)
+        since = datetime.utcnow() - timedelta(days=days)
+
+        # Uploads
+        st.subheader("📄 Uploaded Documents")
+        query_docs = """
+            SELECT doc_id, filename, uploaded_by, domain, content, timestamp
+            FROM documents WHERE timestamp >= %s ALLOW FILTERING
+        """
+        rows = cass_session.execute(query_docs, (since,))
+        doc_df = pd.DataFrame(rows, columns=["doc_id", "filename", "uploaded_by", "domain", "content", "timestamp"])
+
+        if doc_df.empty:
+            st.info("No uploads found.")
+        else:
+            st.metric("🗂️ Total Uploads", len(doc_df))
+            st.metric("👤 Unique Uploaders", doc_df['uploaded_by'].nunique())
+            st.dataframe(doc_df[["filename", "uploaded_by", "domain", "timestamp"]])
+
+        # Sessions
+        st.subheader("💬 Chat Sessions")
+        query_sess = """
+            SELECT session_id, username, title, timestamp
+            FROM sessions WHERE timestamp >= %s ALLOW FILTERING
+        """
+        sessions = cass_session.execute(query_sess, (since,))
+        sess_df = pd.DataFrame(sessions, columns=["session_id", "username", "title", "timestamp"])
+
+        if sess_df.empty:
+            st.info("No sessions found.")
+        else:
+            st.metric("💬 Total Sessions", len(sess_df))
+            st.metric("👥 Active Users", sess_df['username'].nunique())
+
+            count_df = sess_df['username'].value_counts().rename_axis("User").reset_index(name="Session Count")
+            st.bar_chart(count_df.set_index("User"))
+            st.dataframe(sess_df[["username", "title", "timestamp"]])
+
+    except Exception as e:
+        st.error(f"❌ Error loading dashboard: {e}")
+
+

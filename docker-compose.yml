@@ -50,12 +50,30 @@ services:
     command: streamlit run streamlit_app.py --server.port 8501 --server.enableCORS false --server.enableXsrfProtection false
     ports:
       - "8501:8501"
+    env_file:
+      - .env
     volumes:
       - .:/app
     depends_on:
       - ragagentbot
     networks:
       - ragnet
+
+#  streamlit_dashboard:
+#    build:
+#      context: .
+#    container_name: streamlit_dashboard
+#    command: streamlit run dashboard.py --server.port 8502
+#    ports:
+#      - "8502:8502"
+#    env_file:
+#      - .env
+#    volumes:
+#      - ./ragagent:/app
+#    depends_on:
+#      - ragagentbot
+#    networks:
+#      - ragnet
 
 networks:
   ragnet:

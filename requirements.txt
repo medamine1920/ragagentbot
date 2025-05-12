@@ -44,3 +44,7 @@ passlib[bcrypt]==1.7.4
 
 streamlit
 requests
+plotly
+nltk
+scikit-learn
+joblib
