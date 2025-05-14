@@ -20,7 +20,7 @@ etc/
 models/
 documents/
 etc/
-
+bfg-1.15.0.jar
 # Environment secrets
 .env
 .env.*
