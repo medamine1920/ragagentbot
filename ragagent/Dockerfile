@@ -19,7 +19,7 @@ RUN pip install --timeout=600 --no-cache-dir -r requirements.txt
 # THEN: Copy the actual application code
 COPY backend/APP /app
 #COPY frontend /app/frontend
-COPY app .
+#COPY app .
 # Expose ports for FastAPI (8000) and Streamlit (8501)
 EXPOSE 8000
 EXPOSE 8501
