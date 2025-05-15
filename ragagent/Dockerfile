@@ -11,13 +11,13 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # FIRST: Copy only requirements and install dependencies (cache friendly)
-COPY requirements.txt .
+COPY ragagent/requirements.txt .
 
 RUN pip config set global.index-url https://pypi.org/simple
 RUN pip install --timeout=600 --no-cache-dir -r requirements.txt
 
 # THEN: Copy the actual application code
-COPY backend/APP /app
+COPY ragagent/backend/APP /app
 #COPY frontend /app/frontend
 #COPY app .
 # Expose ports for FastAPI (8000) and Streamlit (8501)
