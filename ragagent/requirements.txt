@@ -48,3 +48,4 @@ plotly
 nltk
 scikit-learn
 joblib
+PyMuPDF
